@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Beverage - BookMyShow</title>
+    <style>
+        /* ============================================================
+           GLOBAL STYLES
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            padding: 12px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff6b6b;
+        }
+
+        .logo span {
+            color: white;
+            font-weight: 300;
+        }
+
+        .logo-icon {
+            font-size: 32px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .location-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .location-selector:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-signin {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-signin:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ============================================================
+           NAVIGATION TABS
+           ============================================================ */
+        .nav-tabs {
+            background: white;
+            padding: 0 40px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: sticky;
+            top: 72px;
+            z-index: 999;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .nav-tabs a {
+            text-decoration: none;
+            color: #666;
+            font-weight: 500;
+            padding: 16px 0;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-tabs a:hover {
+            color: #ff6b6b;
+        }
+
+        .nav-tabs a.active {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+        }
+
+        /* ============================================================
+           BOOKING HEADER
+           ============================================================ */
+        .booking-header {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .booking-header .movie-info h2 {
+            font-size: 20px;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .booking-header .movie-info .details {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .booking-header .movie-info .details span {
+            margin-right: 16px;
+        }
+
+        .booking-header .booking-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .booking-header .booking-step .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .booking-header .booking-step .step.active {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .booking-header .booking-step .step .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .booking-header .booking-step .step.active .step-num {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .booking-header .booking-step .step.done .step-num {
+            background: #00b894;
+            color: white;
+        }
+
+        .booking-header .booking-step .step-arrow {
+            color: #ccc;
+            font-size: 18px;
+        }
+
+        /* ============================================================
+           FOOD & BEVERAGE MAIN SECTION
+           ============================================================ */
+        .food-main {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+
+        /* ============================================================
+           FOOD ITEMS LIST
+           ============================================================ */
+        .food-list-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+
+        .food-list-container .food-header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .food-list-container .food-header-section h2 {
+            font-size: 22px;
+            color: #1a1a2e;
+        }
+
+        .food-list-container .food-header-section .offer-tag {
+            background: #fff3cd;
+            color: #856404;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #ffeeba;
+        }
+
+        .food-list-container .food-header-section .offer-tag .code {
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+
+        /* Search Bar */
+        .food-search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .food-search-bar input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .food-search-bar input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .food-search-bar .clear-search {
+            padding: 10px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .food-search-bar .clear-search:hover {
+            background: #e0e0e0;
+        }
+
+        /* Categories */
+        .food-categories {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .food-categories .cat-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .food-categories .cat-btn:hover {
+            border-color: #ff6b6b;
+            transform: translateY(-2px);
+        }
+
+        .food-categories .cat-btn.active {
+            border-color: #ff6b6b;
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Food Grid */
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .food-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .food-grid::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        .food-grid::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .food-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .food-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-color: #ff6b6b;
+        }
+
+        .food-item .food-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .food-item .food-image {
+            width: 100%;
+            height: 120px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e0e0e0, #f0f0f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .food-item .food-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .food-item .food-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .food-item .food-desc {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .food-item .food-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .food-item .food-meta .food-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff6b6b;
+        }
+
+        .food-item .food-meta .food-price .original {
+            font-size: 14px;
+            color: #bbb;
+            text-decoration: line-through;
+            font-weight: 400;
+            margin-right: 8px;
+        }
+
+        .food-item .food-meta .food-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .food-item .food-meta .food-actions .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .food-item .food-meta .food-actions .qty-btn:hover:not(:disabled) {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .food-item .food-meta .food-actions .qty-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .food-item .food-meta .food-actions .qty-display {
+            font-weight: 700;
+            font-size: 16px;
+            min-width: 24px;
+            text-align: center;
+            color: #1a1a2e;
+        }
+
+        .food-item .food-meta .food-actions .add-btn {
+            padding: 6px 16px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .food-item .food-meta .food-actions .add-btn:hover {
+            background: #ff5252;
+        }
+
+        /* ============================================================
+           OFFERS BANNER INSIDE FOOD LIST
+           ============================================================ */
+        .offer-banner-inline {
+            margin-top: 20px;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-radius: 12px;
+            border: 1px solid #ffeeba;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .offer-banner-inline .offer-text {
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .offer-banner-inline .offer-text .highlight {
+            font-weight: 700;
+        }
+
+        .offer-banner-inline .offer-code {
+            background: white;
+            padding: 4px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: #ff6b6b;
+            font-size: 14px;
+        }
+
+        /* ============================================================
+           CART SIDEBAR
+           ============================================================ */
+        .cart-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 180px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .cart-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .cart-sidebar::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 2px;
+        }
+
+        .cart-sidebar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        .cart-sidebar .cart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-sidebar .cart-title .cart-count {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .cart-sidebar .cart-empty {
+            text-align: center;
+            padding: 40px 0;
+            color: #888;
+        }
+
+        .cart-sidebar .cart-empty .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .cart-sidebar .cart-empty p {
+            font-size: 14px;
+        }
+
+        .cart-sidebar .cart-items {
+            margin-bottom: 16px;
+        }
+
+        .cart-sidebar .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .cart-sidebar .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-sidebar .cart-item .item-info {
+            flex: 1;
+        }
+
+        .cart-sidebar .cart-item .item-info .item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .cart-sidebar .cart-item .item-info .item-price {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .cart-sidebar .cart-item .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cart-sidebar .cart-item .item-actions .qty-btn-sm {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f0;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .cart-sidebar .cart-item .item-actions .qty-btn-sm:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .cart-sidebar .cart-item .item-actions .qty-sm {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .cart-sidebar .cart-item .item-actions .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 4px;
+        }
+
+        .cart-sidebar .cart-divider {
+            border-top: 2px solid #f0f0f0;
+            margin: 12px 0;
+        }
+
+        .cart-sidebar .cart-total {
+            margin-top: 12px;
+        }
+
+        .cart-sidebar .cart-total .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .cart-sidebar .cart-total .total-row .amount {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .cart-sidebar .cart-total .total-row.grand-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        .cart-sidebar .cart-total .total-row.grand-total .amount {
+            color: #ff6b6b;
+        }
+
+        .cart-sidebar .btn-checkout {
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cart-sidebar .btn-checkout:hover:not(:disabled) {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+        }
+
+        .cart-sidebar .btn-checkout:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .cart-sidebar .btn-clear-cart {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: transparent;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cart-sidebar .btn-clear-cart:hover {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* ============================================================
+           TOAST NOTIFICATION
+           ============================================================ */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1a1a2e;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .toast .toast-message {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .food-main {
+                grid-template-columns: 1fr;
+            }
+            .cart-sidebar {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 16px;
+                flex-wrap: wrap;
+            }
+            .header-left {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .nav-tabs {
+                padding: 0 16px;
+                gap: 12px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            .nav-tabs a {
+                font-size: 12px;
+                padding: 12px 0;
+                white-space: nowrap;
+            }
+            .main-content {
+                padding: 12px 16px;
+            }
+            .booking-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .booking-header .booking-step {
+                flex-wrap: wrap;
+            }
+            .food-grid {
+                grid-template-columns: 1fr;
+            }
+            .food-list-container {
+                padding: 16px;
+            }
+            .cart-sidebar {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .food-item .food-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .food-item .food-meta .food-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .offer-banner-inline {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo" onclick="window.location.href='homepage.html'">
+                <span class="logo-icon">🎬</span>
+                <span>Book<span>MyShow</span></span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="btn-back" onclick="goBack()">
+                ← Back to Seats
+            </button>
+            <div class="location-selector" onclick="openLocationModal()">
+                <span>📍</span>
+                <span id="currentLocation">Kolhapur</span>
+                <span>▼</span>
+            </div>
+            <button class="btn-signin" onclick="openSignIn()">Sign In</button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    NAVIGATION TABS
+    ============================================================ -->
+    <nav class="nav-tabs">
+        <a href="homepage.html">Movies</a>
+        <a href="#" class="active">Stream</a>
+        <a href="#">Events</a>
+        <a href="#">Plays</a>
+        <a href="#">Sports</a>
+        <a href="#">Activities</a>
+    </nav>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-content">
+
+        <!-- Booking Header -->
+        <div class="booking-header">
+            <div class="movie-info">
+                <h2>🍿 Grab a Bite!</h2>
+                <div class="details">
+                    <span>🎬 Toxic: A Fairy Tale for Grown-ups</span>
+                    <span>🏢 INOX: Reliance Mega Mall, Kolhapur</span>
+                    <span>📅 Sun, 30 Aug 2026 · 08:00 AM</span>
+                </div>
+            </div>
+            <div class="booking-step">
+                <div class="step done">
+                    <span class="step-num">✓</span>
+                    <span>Seats</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="step active">
+                    <span class="step-num">2</span>
+                    <span>Food & Drinks</span>
+                </div>
+                <span class="step-arrow">→</span>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <span>Payment</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Main Layout -->
+        <div class="food-main">
+
+            <!-- Left: Food Items -->
+            <div class="food-list-container">
+
+                <div class="food-header-section">
+                    <h2>🍕 Food & Beverages</h2>
+                    <div class="offer-tag">
+                        💳 Save* 10% · Use Code <span class="code">MUNCH50</span>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="food-search-bar">
+                    <input type="text" id="foodSearchInput" placeholder="🔍 Search for F&B Items..." oninput="filterFoodItems()">
+                    <button class="clear-search" onclick="clearSearch()">✕</button>
+                </div>
+
+                <!-- Categories -->
+                <div class="food-categories" id="foodCategories">
+                    <button class="cat-btn active" data-category="all" onclick="filterByCategory('all', this)">All</button>
+                    <button class="cat-btn" data-category="combos" onclick="filterByCategory('combos', this)">🎯 Combos</button>
+                    <button class="cat-btn" data-category="popcorn" onclick="filterByCategory('popcorn', this)">🍿 Popcorn</button>
+                    <button class="cat-btn" data-category="snacks" onclick="filterByCategory('snacks', this)">🌮 Snacks</button>
+                    <button class="cat-btn" data-category="beverages" onclick="filterByCategory('beverages', this)">🥤 Beverages</button>
+                    <button class="cat-btn" data-category="sandwiches" onclick="filterByCategory('sandwiches', this)">🥪 Sandwiches</button>
+                </div>
+
+                <!-- Food Grid -->
+                <div class="food-grid" id="foodGrid">
+                    <!-- Dynamically generated by JavaScript -->
+                </div>
+
+                <!-- Offer Banner -->
+                <div class="offer-banner-inline">
+                    <span class="offer-text">
+                        🎉 <span class="highlight">Enjoy B1G1 Ticket Free!</span> with Bandhan Bank Legacy Debit Cards
+                    </span>
+                    <span class="offer-code">BANDHANB1G1</span>
+                </div>
+
+            </div>
+
+            <!-- Right: Cart Sidebar -->
+            <div class="cart-sidebar" id="cartSidebar">
+                <div class="cart-title">
+                    🛒 Your Order
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+
+                <div id="cartContent">
+                    <!-- Cart items rendered by JavaScript -->
+                </div>
+
+                <div class="cart-divider"></div>
+
+                <div class="cart-total">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span class="amount" id="cartSubtotal">₹0</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Discount (10%)</span>
+                        <span class="amount" id="cartDiscount">-₹0</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Total</span>
+                        <span class="amount" id="cartTotal">₹0</span>
+                    </div>
+                </div>
+
+                <button class="btn-checkout" id="checkoutBtn" disabled onclick="proceedToCheckout()">
+                    🎫 Proceed to Payment
+                </button>
+                <button class="btn-clear-cart" onclick="clearCart()">🗑️ Clear Cart</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    TOAST NOTIFICATION
+    ============================================================ -->
+    <div class="toast" id="toast">
+        <div class="toast-title" id="toastTitle">✅ Added to Cart</div>
+        <div class="toast-message" id="toastMessage">Item added successfully</div>
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // FOOD DATA
+        // ============================================================
+        const foodData = [{
+            id: 1,
+            name: 'Combo 2 (Salted)',
+            desc: 'Salted Popcorn 170g + 2 Coke 450ml (1159 Kcal)',
+            price: 1000,
+            originalPrice: 1200,
+            category: 'combos',
+            emoji: '🍿',
+            allergens: 'Milk, Caffeine',
+            image: 'https://picsum.photos/seed/combo1/300/200'
+        }, {
+            id: 2,
+            name: 'Regular Cheese Popcorn',
+            desc: 'Regular Cheese Popcorn 80g (423 Kcal)',
+            price: 395,
+            originalPrice: 450,
+            category: 'popcorn',
+            emoji: '🧀',
+            allergens: 'Milk',
+            image: 'https://picsum.photos/seed/popcorn1/300/200'
+        }, {
+            id: 3,
+            name: 'Large Nachos With Cheese & Salsa',
+            desc: 'Large Nachos With Cheese & Salsa Dip 90g',
+            price: 345,
+            originalPrice: 400,
+            category: 'snacks',
+            emoji: '🌮',
+            allergens: 'Milk, Gluten',
+            image: 'https://picsum.photos/seed/nachos1/300/200'
+        }, {
+            id: 4,
+            name: 'Nachos Combo',
+            desc: 'Nachos With Cheese & Salsa 90g + Coke 450ml (840 Kcal)',
+            price: 620,
+            originalPrice: 700,
+            category: 'combos',
+            emoji: '🥤',
+            allergens: 'Milk, Gluten, Caffeine',
+            image: 'https://picsum.photos/seed/nachos2/300/200'
+        }, {
+            id: 5,
+            name: 'Combo 1 (Cheese)',
+            desc: 'Cheese Popcorn 180g + Coke 450ml (595 Kcal)',
+            price: 670,
+            originalPrice: 750,
+            category: 'combos',
+            emoji: '🧀',
+            allergens: 'Milk, Caffeine',
+            image: 'https://picsum.photos/seed/combo2/300/200'
+        }, {
+            id: 6,
+            name: 'Regular Coke 540ml',
+            desc: 'Regular Coke (540ml | 232 Kcal)',
+            price: 310,
+            originalPrice: 350,
+            category: 'beverages',
+            emoji: '🥤',
+            allergens: 'Caffeine',
+            image: 'https://picsum.photos/seed/coke1/300/200'
+        }, {
+            id: 7,
+            name: 'Combo 2 (Cheese)',
+            desc: 'Cheese Popcorn 170g + 2 Coke 450ml (1155 Kcal)',
+            price: 1050,
+            originalPrice: 1200,
+            category: 'combos',
+            emoji: '🧀',
+            allergens: 'Milk, Caffeine',
+            image: 'https://picsum.photos/seed/combo3/300/200'
+        }, {
+            id: 8,
+            name: 'Medium Cheese Popcorn 170g',
+            desc: 'Medium Cheese Popcorn 170g (846 Kcal)',
+            price: 545,
+            originalPrice: 600,
+            category: 'popcorn',
+            emoji: '🧀',
+            allergens: 'Milk',
+            image: 'https://picsum.photos/seed/popcorn2/300/200'
+        }, {
+            id: 9,
+            name: 'Regular Caramel Popcorn 80g',
+            desc: 'Regular Caramel Popcorn 80g (413 Kcal)',
+            price: 360,
+            originalPrice: 400,
+            category: 'popcorn',
+            emoji: '🍿',
+            allergens: 'Soybean',
+            image: 'https://picsum.photos/seed/popcorn3/300/200'
+        }, {
+            id: 10,
+            name: 'Large Coke 810ml',
+            desc: 'Large Coke (810ml | 348.40 Kcal)',
+            price: 530,
+            originalPrice: 580,
+            category: 'beverages',
+            emoji: '🥤',
+            allergens: 'Caffeine',
+            image: 'https://picsum.photos/seed/coke2/300/200'
+        }, {
+            id: 11,
+            name: 'Chicken Tikka Sandwich',
+            desc: 'Chicken Tikka Sandwich (190g)',
+            price: 210,
+            originalPrice: 250,
+            category: 'sandwiches',
+            emoji: '🥪',
+            allergens: 'Milk, Wheat, Gluten',
+            image: 'https://picsum.photos/seed/sandwich1/300/200'
+        }, {
+            id: 12,
+            name: 'Medium Salted Popcorn 170g',
+            desc: 'Medium Salted Popcorn 170g (849 Kcal)',
+            price: 495,
+            originalPrice: 550,
+            category: 'popcorn',
+            emoji: '🍿',
+            allergens: 'Milk',
+            image: 'https://picsum.photos/seed/popcorn4/300/200'
+        }, {
+            id: 13,
+            name: 'Combo 2 (Caramel)',
+            desc: 'Caramel Popcorn 80g + Coke 450ml (1196 Kcal)',
+            price: 620,
+            originalPrice: 700,
+            category: 'combos',
+            emoji: '🍿',
+            allergens: 'Milk, Caffeine',
+            image: 'https://picsum.photos/seed/combo4/300/200'
+        }, {
+            id: 14,
+            name: 'Garden Fresh Veggie Focaccia',
+            desc: 'Garden Fresh Veggie Focaccia Sandwich 190g (287 Kcal)',
+            price: 310,
+            originalPrice: 360,
+            category: 'sandwiches',
+            emoji: '🥪',
+            allergens: 'Milk, Wheat, Gluten',
+            image: 'https://picsum.photos/seed/sandwich2/300/200'
+        }, {
+            id: 15,
+            name: 'Paneer Tikka Sandwich',
+            desc: 'Paneer Tikka Sandwich 190g (529 Kcal)',
+            price: 310,
+            originalPrice: 360,
+            category: 'sandwiches',
+            emoji: '🥪',
+            allergens: 'Milk, Wheat, Soybean, Gluten',
+            image: 'https://picsum.photos/seed/sandwich3/300/200'
+        }, {
+            id: 16,
+            name: 'Medium Caramel Popcorn 170g',
+            desc: 'Medium Caramel Popcorn 170g (826 Kcal)',
+            price: 545,
+            originalPrice: 600,
+            category: 'popcorn',
+            emoji: '🍿',
+            allergens: 'Soybean',
+            image: 'https://picsum.photos/seed/popcorn5/300/200'
+        }, {
+            id: 17,
+            name: 'Large Salted Popcorn 220g',
+            desc: 'Large Salted Popcorn 220g (849 Kcal)',
+            price: 715,
+            originalPrice: 780,
+            category: 'popcorn',
+            emoji: '🍿',
+            allergens: 'Milk',
+            image: 'https://picsum.photos/seed/popcorn6/300/200'
+        }, {
+            id: 18,
+            name: 'Spicy Chicken Focaccia',
+            desc: 'Spicy Chicken Focaccia Sandwich 190g (456 Kcal)',
+            price: 360,
+            originalPrice: 420,
+            category: 'sandwiches',
+            emoji: '🥪',
+            allergens: 'Milk, Wheat, Gluten',
+            image: 'https://picsum.photos/seed/sandwich4/300/200'
+        }];
+
+        // ============================================================
+        // CART STATE
+        // ============================================================
+        let cart = [];
+        let currentCategory = 'all';
+        let currentSearch = '';
+
+        // ============================================================
+        // RENDER FOOD ITEMS
+        // ============================================================
+        function renderFoodItems() {
+            const grid = document.getElementById('foodGrid');
+            grid.innerHTML = '';
+
+            let filtered = foodData;
+
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(item => item.category === currentCategory);
+            }
+
+            // Filter by search
+            if (currentSearch.trim()) {
+                const searchLower = currentSearch.toLowerCase();
+                filtered = filtered.filter(item =>
+                    item.name.toLowerCase().includes(searchLower) ||
+                    item.desc.toLowerCase().includes(searchLower) ||
+                    item.category.toLowerCase().includes(searchLower)
+                );
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: #888;">
+                        <div style="font-size: 48px; margin-bottom: 12px;">🔍</div>
+                        <p>No items found matching your search.</p>
+                        <p style="font-size: 13px; margin-top: 4px;">Try adjusting your filters or search terms.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const cartItem = cart.find(c => c.id === item.id);
+                const qty = cartItem ? cartItem.qty : 0;
+
+                const div = document.createElement('div');
+                div.className = 'food-item';
+                div.setAttribute('data-id', item.id);
+
+                div.innerHTML = `
+                    ${qty > 0 ? `<span class="food-badge">${qty}</span>` : ''}
+                    <div class="food-image">
+                        <img src="${item.image}" alt="${item.name}" loading="lazy">
+                    </div>
+                    <div class="food-name">${item.emoji} ${item.name}</div>
+                    <div class="food-desc">${item.desc}</div>
+                    <div class="food-meta">
+                        <span class="food-price">
+                            ${item.originalPrice ? `<span class="original">₹${item.originalPrice}</span>` : ''}
+                            ₹${item.price}
+                        </span>
+                        <div class="food-actions">
+                            ${qty > 0 ? `
+                                <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
+                                <span class="qty-display">${qty}</span>
+                                <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                            ` : `
+                                <button class="add-btn" onclick="addToCart(${item.id})">Add</button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+
+            updateCartUI();
+        }
+
+        // ============================================================
+        // CATEGORY FILTER
+        // ============================================================
+        function filterByCategory(category, btn) {
+            currentCategory = category;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderFoodItems();
+        }
+
+        // ============================================================
+        // SEARCH FILTER
+        // ============================================================
+        function filterFoodItems() {
+            currentSearch = document.getElementById('foodSearchInput').value;
+            renderFoodItems();
+        }
+
+        function clearSearch() {
+            document.getElementById('foodSearchInput').value = '';
+            currentSearch = '';
+            renderFoodItems();
+        }
+
+        // ============================================================
+        // CART OPERATIONS
+        // ============================================================
+        function addToCart(id) {
+            const item = foodData.find(f => f.id === id);
+            if (!item) return;
+
+            const existing = cart.find(c => c.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+
+            showToast('✅ Added to Cart', `${item.name} added successfully!`);
+            renderFoodItems();
+            updateCartUI();
+        }
+
+        function updateQty(id, delta) {
+            const existing = cart.find(c => c.id === id);
+            if (!existing) return;
+
+            existing.qty += delta;
+            if (existing.qty <= 0) {
+                cart = cart.filter(c => c.id !== id);
+            }
+
+            renderFoodItems();
+            updateCartUI();
+        }
+
+        function removeFromCart(id) {
+            const item = foodData.find(f => f.id === id);
+            cart = cart.filter(c => c.id !== id);
+            showToast('🗑️ Removed', `${item ? item.name : 'Item'} removed from cart.`);
+            renderFoodItems();
+            updateCartUI();
+        }
+
+        function clearCart() {
+            if (cart.length === 0) return;
+            if (confirm('Are you sure you want to clear your entire cart?')) {
+                cart = [];
+                renderFoodItems();
+                updateCartUI();
+                showToast('🗑️ Cart Cleared', 'All items have been removed from your cart.');
+            }
+        }
+
+        // ============================================================
+        // UPDATE CART UI
+        // ============================================================
+        function updateCartUI() {
+            const cartContent = document.getElementById('cartContent');
+            const cartCount = document.getElementById('cartCount');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const discount = Math.min(subtotal * 0.10, 100); // 10% discount, max ₹100
+            const total = subtotal - discount;
+
+            cartCount.textContent = totalItems;
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="cart-empty">
+                        <div class="empty-icon">🛒</div>
+                        <p>Your cart is empty</p>
+                        <p style="font-size: 13px; color: #aaa;">Browse our delicious food items!</p>
+                    </div>
+                `;
+                checkoutBtn.disabled = true;
+            } else {
+                let itemsHTML = '<div class="cart-items">';
+                cart.forEach(item => {
+                    itemsHTML += `
+                        <div class="cart-item">
+                            <div class="item-info">
+                                <div class="item-name">${item.emoji} ${item.name}</div>
+                                <div class="item-price">₹${item.price} × ${item.qty}</div>
+                            </div>
+                            <div class="item-actions">
+                                <button class="qty-btn-sm" onclick="updateQty(${item.id}, -1)">−</button>
+                                <span class="qty-sm">${item.qty}</span>
+                                <button class="qty-btn-sm" onclick="updateQty(${item.id}, 1)">+</button>
+                                <button class="remove-btn" onclick="removeFromCart(${item.id})">✕</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                itemsHTML += '</div>';
+                cartContent.innerHTML = itemsHTML;
+                checkoutBtn.disabled = false;
+            }
+
+            document.getElementById('cartSubtotal').textContent = `₹${subtotal}`;
+            document.getElementById('cartDiscount').textContent = `-₹${discount.toFixed(0)}`;
+            document.getElementById('cartTotal').textContent = `₹${total.toFixed(0)}`;
+        }
+
+        // ============================================================
+        // PROCEED TO CHECKOUT
+        // ============================================================
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Please add some items.');
+                return;
+            }
+
+            const total = document.getElementById('cartTotal').textContent;
+            const items = cart.map(item => `${item.emoji} ${item.name} (${item.qty})`).join(', ');
+
+            // Save food order to localStorage
+            const foodOrder = {
+                items: cart,
+                total: total,
+                subtotal: document.getElementById('cartSubtotal').textContent,
+                discount: document.getElementById('cartDiscount').textContent
+            };
+            localStorage.setItem('foodOrder', JSON.stringify(foodOrder));
+
+            if (confirm(`🛒 Confirm your food order:\n\n${items}\n\nTotal: ${total}\n\nProceed to payment?`)) {
+                window.location.href = 'booking-confirmation.html';
+            }
+        }
+
+        // ============================================================
+        // TOAST NOTIFICATION
+        // ============================================================
+        let toastTimeout;
+
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function goBack() {
+            window.location.href = 'seat-selection.html';
+        }
+
+        function openLocationModal() {
+            const cities = ['Kolhapur', 'Mumbai', 'Pune', 'Hyderabad', 'Delhi', 'Bangalore'];
+            const newCity = prompt(`Select your city:\n${cities.join(', ')}`, 'Kolhapur');
+            if (newCity && cities.includes(newCity)) {
+                document.getElementById('currentLocation').textContent = newCity;
+            }
+        }
+
+        function openSignIn() {
+            alert('Sign In modal would open here');
+        }
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F to focus search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('foodSearchInput').focus();
+            }
+            // Escape to clear search
+            if (e.key === 'Escape') {
+                const searchInput = document.getElementById('foodSearchInput');
+                if (document.activeElement === searchInput) {
+                    clearSearch();
+                    searchInput.blur();
+                }
+            }
+            // Ctrl+B to go back
+            if (e.ctrlKey && e.key === 'b') {
+                e.preventDefault();
+                goBack();
+            }
+        });
+
+        // ============================================================
+        // LOAD FOOD ORDER FROM LOCAL STORAGE (if returning)
+        // ============================================================
+        function loadFoodOrder() {
+            try {
+                const saved = localStorage.getItem('foodOrder');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.items && data.items.length > 0) {
+                        cart = data.items;
+                        renderFoodItems();
+                        updateCartUI();
+                        console.log('🔄 Restored food order from session');
+                    }
+                }
+            } catch (e) {
+                console.log('No saved food order found');
+            }
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFoodOrder();
+            renderFoodItems();
+            updateCartUI();
+
+            console.log('🍿 Food & Beverage page loaded!');
+            console.log('📦 ' + foodData.length + ' food items available');
+            console.log('🛒 ' + cart.length + ' items in cart');
+            console.log('💡 Ctrl+F to search, Esc to clear search, Ctrl+B to go back');
+        });
+    </script>
+</body>
+</html>

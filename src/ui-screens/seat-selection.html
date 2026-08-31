@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Selection - BookMyShow</title>
+    <style>
+        /* ============================================================
+           INHERITED STYLES
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f5f5; color: #333; }
+        
+        /* Header (same as other pages) */
+        .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.3); }
+        .header-left { display: flex; align-items: center; gap: 30px; }
+        .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 24px; font-weight: 700; color: #ff6b6b; }
+        .logo span { color: white; font-weight: 300; }
+        .logo-icon { font-size: 32px; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .location-selector { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .btn-signin { background: #ff6b6b; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-signin:hover { background: #ff5252; transform: translateY(-2px); }
+        .nav-tabs { background: white; padding: 0 40px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 30px; position: sticky; top: 72px; z-index: 999; }
+        .nav-tabs a { text-decoration: none; color: #666; font-weight: 500; padding: 16px 0; border-bottom: 3px solid transparent; transition: all 0.3s; font-size: 14px; }
+        .nav-tabs a:hover { color: #ff6b6b; }
+        .nav-tabs a.active { color: #ff6b6b; border-bottom-color: #ff6b6b; }
+        .nav-tabs .list-your-show { margin-left: auto; color: #ff6b6b; font-weight: 600; background: rgba(255,107,107,0.1); padding: 8px 16px; border-radius: 8px; border-bottom: none !important; }
+
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 20px 40px; }
+
+        /* ============================================================
+           SEAT SELECTION SPECIFIC STYLES
+           ============================================================ */
+
+        .booking-header {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .booking-header .movie-info h2 {
+            font-size: 20px;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+
+        .booking-header .movie-info .details {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .booking-header .movie-info .details span {
+            margin-right: 16px;
+        }
+
+        .booking-header .time-slots {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .booking-header .time-slots .time-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .booking-header .time-slots .time-btn:hover {
+            border-color: #ff6b6b;
+        }
+
+        .booking-header .time-slots .time-btn.active {
+            border-color: #ff6b6b;
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .booking-header .time-slots .time-btn .sub {
+            font-size: 10px;
+            font-weight: 400;
+            opacity: 0.7;
+            display: block;
+        }
+
+        /* ============================================================
+           SEAT MAP
+           ============================================================ */
+        .seat-map-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .seat-map-container .screen-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .seat-map-container .screen-area .screen {
+            display: inline-block;
+            background: linear-gradient(180deg, #1a1a2e, #2d3436);
+            color: #888;
+            padding: 8px 60px;
+            border-radius: 4px 4px 20px 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 600;
+            min-width: 400px;
+        }
+
+        .seat-map-container .screen-area .screen-label {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .seat-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .seat-row .row-label {
+            width: 24px;
+            text-align: right;
+            font-weight: 600;
+            color: #888;
+            font-size: 11px;
+        }
+
+        .seat-row .seat {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px 6px 4px 4px;
+            background: #e8f5e9;
+            border: 2px solid #a5d6a7;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .seat-row .seat:hover:not(.sold):not(.selected) {
+            transform: scale(1.1);
+            border-color: #ff6b6b;
+            box-shadow: 0 2px 10px rgba(255,107,107,0.3);
+        }
+
+        .seat-row .seat.sold {
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+            cursor: not-allowed;
+            color: #bbb;
+        }
+
+        .seat-row .seat.selected {
+            background: #ff6b6b;
+            border-color: #ff5252;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 15px rgba(255,107,107,0.4);
+        }
+
+        .seat-row .seat.bestseller {
+            background: #ffd700;
+            border-color: #f9a825;
+            color: #333;
+        }
+
+        .seat-row .seat.bestseller::after {
+            content: '⭐';
+            font-size: 10px;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+
+        .seat-row .seat.reserved {
+            background: #fff3e0;
+            border-color: #ffcc80;
+            cursor: not-allowed;
+            color: #888;
+        }
+
+        .seat-row .seat .seat-number {
+            font-size: 8px;
+            opacity: 0.7;
+        }
+
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 20px 0 10px;
+            flex-wrap: wrap;
+        }
+
+        .seat-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .seat-legend .legend-item .legend-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .seat-legend .legend-item .legend-box.available {
+            background: #e8f5e9;
+            border: 2px solid #a5d6a7;
+        }
+
+        .seat-legend .legend-item .legend-box.sold {
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+        }
+
+        .seat-legend .legend-item .legend-box.selected {
+            background: #ff6b6b;
+            border: 2px solid #ff5252;
+        }
+
+        .seat-legend .legend-item .legend-box.bestseller {
+            background: #ffd700;
+            border: 2px solid #f9a825;
+        }
+
+        .seat-legend .legend-item .legend-box.reserved {
+            background: #fff3e0;
+            border: 2px solid #ffcc80;
+        }
+
+        /* ============================================================
+           SECTION TYPES
+           ============================================================ */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 16px 0 10px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .section-divider .line {
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+
+        .section-divider .label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .section-divider .label .price {
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           BOOKING SUMMARY SIDEBAR
+           ============================================================ */
+        .booking-sidebar {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 180px;
+        }
+
+        .booking-sidebar .summary-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+        }
+
+        .booking-sidebar .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .booking-sidebar .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .booking-sidebar .summary-item .label {
+            color: #888;
+        }
+
+        .booking-sidebar .summary-item .value {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .booking-sidebar .summary-item .value.highlight {
+            color: #ff6b6b;
+        }
+
+        .booking-sidebar .total-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .booking-sidebar .total-section .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .booking-sidebar .total-section .total-row .total-amount {
+            color: #ff6b6b;
+        }
+
+        .booking-sidebar .btn-proceed {
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .booking-sidebar .btn-proceed:hover:not(:disabled) {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+        }
+
+        .booking-sidebar .btn-proceed:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .booking-sidebar .offer-banner {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #fff3cd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .booking-sidebar .offer-banner .code {
+            font-weight: 700;
+            color: #ff6b6b;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* ============================================================
+           FOOD & BEVERAGE SECTION
+           ============================================================ */
+        .food-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .food-section .food-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .food-section .food-header h3 {
+            font-size: 18px;
+            color: #1a1a2e;
+        }
+
+        .food-section .food-header .food-search {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            width: 250px;
+            transition: all 0.3s;
+        }
+
+        .food-section .food-header .food-search:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .food-categories {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .food-categories .cat-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .food-categories .cat-btn:hover {
+            border-color: #ff6b6b;
+        }
+
+        .food-categories .cat-btn.active {
+            border-color: #ff6b6b;
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .food-item:hover {
+            background: #f0f0f0;
+        }
+
+        .food-item .food-info {
+            flex: 1;
+        }
+
+        .food-item .food-info .food-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .food-item .food-info .food-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .food-item .food-info .food-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ff6b6b;
+        }
+
+        .food-item .food-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .food-item .food-action .qty-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .food-item .food-action .qty-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .food-item .food-action .qty-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .food-item .food-action .qty-display {
+            font-weight: 600;
+            font-size: 16px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* ============================================================
+           LAYOUT: Main + Sidebar
+           ============================================================ */
+        .seat-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .seat-layout {
+                grid-template-columns: 1fr;
+            }
+            .booking-sidebar {
+                position: static;
+            }
+            .seat-map-container .screen-area .screen {
+                min-width: 200px;
+                padding: 8px 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header { padding: 10px 16px; flex-wrap: wrap; }
+            .header-left { width: 100%; flex-wrap: wrap; }
+            .header-right { width: 100%; justify-content: flex-end; }
+            .nav-tabs { padding: 0 16px; gap: 12px; overflow-x: auto; flex-wrap: nowrap; }
+            .nav-tabs a { font-size: 12px; padding: 12px 0; white-space: nowrap; }
+            .main-content { padding: 12px 16px; }
+            .booking-header { flex-direction: column; align-items: flex-start; }
+            .seat-map-container { padding: 16px; }
+            .seat-row .seat { width: 28px; height: 28px; font-size: 8px; }
+            .seat-map-container .screen-area .screen { min-width: 150px; font-size: 10px; }
+            .food-grid { grid-template-columns: 1fr; }
+            .food-section .food-header { flex-direction: column; align-items: stretch; }
+            .food-section .food-header .food-search { width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .seat-row .seat { width: 22px; height: 22px; font-size: 7px; }
+            .seat-row { gap: 4px; }
+            .seat-legend { gap: 12px; font-size: 11px; }
+            .booking-sidebar { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo" onclick="window.location.href='homepage.html'">
+                <span class="logo-icon">🎬</span>
+                <span>Book<span>MyShow</span></span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="location-selector" onclick="openLocationModal()">
+                <span class="location-icon">📍</span>
+                <span id="currentLocation">Kolhapur</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+            <button class="btn-signin" onclick="openSignIn()">Sign In</button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    NAVIGATION TABS
+    ============================================================ -->
+    <nav class="nav-tabs">
+        <a href="homepage.html">Movies</a>
+        <a href="#" class="active">Stream</a>
+        <a href="#">Events</a>
+        <a href="#">Plays</a>
+        <a href="#">Sports</a>
+        <a href="#">Activities</a>
+        <a href="#" class="list-your-show">📢 List Your Show</a>
+    </nav>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-content">
+
+        <!-- Booking Header -->
+        <div class="booking-header">
+            <div class="movie-info">
+                <h2 id="movieTitle">Toxic: A Fairy Tale for Grown-ups (Hindi) - Hindi</h2>
+                <div class="details">
+                    <span>🎬 INOX: Reliance Mega Mall, Kolhapur</span>
+                    <span>📅 Sun, 30 August, 2026</span>
+                    <span>⏰ 08:00 AM</span>
+                </div>
+            </div>
+            <div class="time-slots" id="timeSlots">
+                <button class="time-btn active" onclick="selectTime(this, '08:00 AM')">
+                    08:00 AM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '10:15 AM')">
+                    10:15 AM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '11:15 AM')">
+                    11:15 AM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '02:10 PM')">
+                    02:10 PM
+                    <span class="sub">Fast Filling</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '03:10 PM')">
+                    03:10 PM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '06:05 PM')">
+                    06:05 PM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '07:05 PM')">
+                    07:05 PM
+                    <span class="sub">Available</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '10:00 PM')">
+                    10:00 PM
+                    <span class="sub">Fast Filling</span>
+                </button>
+                <button class="time-btn" onclick="selectTime(this, '11:00 PM')">
+                    11:00 PM
+                    <span class="sub">Available</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Seat Layout Grid -->
+        <div class="seat-layout">
+
+            <!-- Left: Seat Map -->
+            <div>
+
+                <!-- Seat Map Container -->
+                <div class="seat-map-container">
+                    <div class="screen-area">
+                        <div class="screen">🎬 S C R E E N</div>
+                        <div class="screen-label">Screen 1 · INOX: Reliance Mega Mall</div>
+                    </div>
+
+                    <!-- How many seats? -->
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: #1a1a2e; font-size: 14px;">How many seats?</span>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="seat-count-btn" onclick="setSeatCount(1)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">1</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(2)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">2</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(3)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">3</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(4)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">4</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(5)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">5</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(6)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">6</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(7)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">7</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(8)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">8</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(9)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">9</button>
+                            <button class="seat-count-btn" onclick="setSeatCount(10)" style="padding: 4px 12px; border: 2px solid #e0e0e0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">10</button>
+                        </div>
+                    </div>
+
+                    <!-- Seat Map -->
+                    <div class="seat-map" id="seatMap">
+                        <!-- Dynamically generated by JavaScript -->
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="seat-legend">
+                        <span class="legend-item">
+                            <span class="legend-box available"></span> Available
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-box sold"></span> Sold
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-box bestseller"></span> Bestseller
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-box selected"></span> Selected
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-box reserved"></span> Reserved
+                        </span>
+                    </div>
+
+                    <div style="text-align: center; font-size: 12px; color: #888; margin-top: 8px;">
+                        💡 Book the <strong>Bestseller Seats</strong> in this cinema at no extra cost!
+                    </div>
+                </div>
+
+                <!-- Food & Beverage Section -->
+                <div class="food-section">
+                    <div class="food-header">
+                        <h3>🍿 Grab a Bite!</h3>
+                        <input type="text" class="food-search" placeholder="Search for F&B Items..." id="foodSearch">
+                    </div>
+
+                    <div class="food-categories" id="foodCategories">
+                        <button class="cat-btn active" onclick="filterFood(this, 'all')">All</button>
+                        <button class="cat-btn" onclick="filterFood(this, 'combos')">Combos</button>
+                        <button class="cat-btn" onclick="filterFood(this, 'popcorn')">Popcorn</button>
+                        <button class="cat-btn" onclick="filterFood(this, 'snacks')">Snacks</button>
+                        <button class="cat-btn" onclick="filterFood(this, 'beverages')">Beverages</button>
+                    </div>
+
+                    <div class="food-grid" id="foodGrid">
+                        <!-- Dynamically generated -->
+                    </div>
+
+                    <div style="margin-top: 12px; padding: 10px 16px; background: #fff3cd; border-radius: 8px; font-size: 13px; color: #856404; border: 1px solid #ffeeba; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <span>💳 Save* 10% on movie snacks by pre-booking them!</span>
+                        <span style="font-weight: 700;">USE CODE <span style="background: white; padding: 2px 10px; border-radius: 4px; color: #ff6b6b;">MUNCH50</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Booking Sidebar -->
+            <div>
+                <div class="booking-sidebar">
+                    <div class="summary-title">Booking Summary</div>
+
+                    <div class="summary-item">
+                        <span class="label">Movie</span>
+                        <span class="value" id="sidebarMovie">Toxic</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Theatre</span>
+                        <span class="value" id="sidebarTheatre">INOX: Reliance Mega Mall</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Date</span>
+                        <span class="value" id="sidebarDate">Sun, 30 Aug 2026</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Time</span>
+                        <span class="value" id="sidebarTime">08:00 AM</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Seats</span>
+                        <span class="value" id="sidebarSeats">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Seat Price</span>
+                        <span class="value" id="sidebarSeatPrice">₹220</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">Subtotal</span>
+                        <span class="value" id="sidebarSubtotal">₹0</span>
+                    </div>
+                    <div class="summary-item" style="border-bottom: none;">
+                        <span class="label">Food & Beverages</span>
+                        <span class="value" id="sidebarFood">₹0</span>
+                    </div>
+
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>Total</span>
+                            <span class="total-amount" id="sidebarTotal">₹0</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-proceed" id="proceedBtn" disabled onclick="proceedToPayment()">
+                        🎫 Pay ₹0
+                    </button>
+
+                    <div class="offer-banner">
+                        🎉 <strong>Enjoy B1G1 Ticket Free!</strong> with Bandhan Bank Legacy Debit Cards
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // STATE
+        // ============================================================
+        let selectedSeats = [];
+        let maxSeats = 0;
+        let foodCart = [];
+        const seatPrice = 220;
+        const vipPrice = 350;
+        const reclinerPrice = 450;
+
+        // ============================================================
+        // SEAT MAP DATA
+        // ============================================================
+        function generateSeatMap() {
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+            const seatMap = document.getElementById('seatMap');
+            seatMap.innerHTML = '';
+
+            // Section: PRIME ROWS
+            const primeDivider = createSectionDivider('PRIME ROWS', '₹' + seatPrice);
+            seatMap.appendChild(primeDivider);
+
+            rows.slice(0, 3).forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                const label = document.createElement('span');
+                label.className = 'row-label';
+                label.textContent = row;
+                rowDiv.appendChild(label);
+
+                for (let i = 1; i <= 15; i++) {
+                    const seat = document.createElement('div');
+                    const seatId = row + String(i).padStart(2, '0');
+                    const isSold = Math.random() > 0.85;
+                    const isBestseller = (rowIndex === 1 && (i >= 4 && i <= 8));
+                    
+                    seat.className = 'seat';
+                    if (isSold) {
+                        seat.classList.add('sold');
+                    } else if (isBestseller) {
+                        seat.classList.add('bestseller');
+                    }
+                    seat.dataset.seatId = seatId;
+                    seat.dataset.row = row;
+                    seat.dataset.number = String(i).padStart(2, '0');
+                    seat.dataset.price = seatPrice;
+                    seat.dataset.available = !isSold;
+                    seat.innerHTML = `<span class="seat-number">${i}</span>`;
+                    
+                    if (!isSold) {
+                        seat.onclick = function() { toggleSeat(this); };
+                    }
+                    rowDiv.appendChild(seat);
+                }
+                seatMap.appendChild(rowDiv);
+            });
+
+            // Section: CLASSIC ROWS
+            const classicDivider = createSectionDivider('CLASSIC ROWS', '₹200');
+            seatMap.appendChild(classicDivider);
+
+            rows.slice(3, 9).forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                const label = document.createElement('span');
+                label.className = 'row-label';
+                label.textContent = row;
+                rowDiv.appendChild(label);
+
+                const cols = rowIndex < 4 ? 16 : 14;
+                for (let i = 1; i <= cols; i++) {
+                    const seat = document.createElement('div');
+                    const seatId = row + String(i).padStart(2, '0');
+                    const isSold = Math.random() > 0.8;
+                    
+                    seat.className = 'seat';
+                    if (isSold) {
+                        seat.classList.add('sold');
+                    }
+                    seat.dataset.seatId = seatId;
+                    seat.dataset.row = row;
+                    seat.dataset.number = String(i).padStart(2, '0');
+                    seat.dataset.price = 200;
+                    seat.dataset.available = !isSold;
+                    seat.innerHTML = `<span class="seat-number">${i}</span>`;
+                    
+                    if (!isSold) {
+                        seat.onclick = function() { toggleSeat(this); };
+                    }
+                    rowDiv.appendChild(seat);
+                }
+                seatMap.appendChild(rowDiv);
+            });
+
+            // Section: RECLINER ROWS
+            const reclinerDivider = createSectionDivider('RECLINER ROWS', '₹350');
+            seatMap.appendChild(reclinerDivider);
+
+            rows.slice(9, 12).forEach((row) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                const label = document.createElement('span');
+                label.className = 'row-label';
+                label.textContent = row;
+                rowDiv.appendChild(label);
+
+                for (let i = 1; i <= 12; i++) {
+                    const seat = document.createElement('div');
+                    const seatId = row + String(i).padStart(2, '0');
+                    const isSold = Math.random() > 0.75;
+                    
+                    seat.className = 'seat';
+                    if (isSold) {
+                        seat.classList.add('sold');
+                    }
+                    seat.dataset.seatId = seatId;
+                    seat.dataset.row = row;
+                    seat.dataset.number = String(i).padStart(2, '0');
+                    seat.dataset.price = reclinerPrice;
+                    seat.dataset.available = !isSold;
+                    seat.innerHTML = `<span class="seat-number">${i}</span>`;
+                    
+                    if (!isSold) {
+                        seat.onclick = function() { toggleSeat(this); };
+                    }
+                    rowDiv.appendChild(seat);
+                }
+                seatMap.appendChild(rowDiv);
+            });
+        }
+
+        function createSectionDivider(label, price) {
+            const div = document.createElement('div');
+            div.className = 'section-divider';
+            div.innerHTML = `
+                <span class="line"></span>
+                <span class="label">${label} <span class="price">${price}</span></span>
+                <span class="line"></span>
+            `;
+            return div;
+        }
+
+        // ============================================================
+        // SEAT SELECTION
+        // ============================================================
+        function toggleSeat(element) {
+            if (element.classList.contains('sold')) return;
+            if (element.classList.contains('reserved')) return;
+
+            if (element.classList.contains('selected')) {
+                // Deselect
+                element.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(id => id !== element.dataset.seatId);
+                updateSelectedCount();
+                updateSummary();
+                return;
+            }
+
+            // Check max seats
+            if (maxSeats > 0 && selectedSeats.length >= maxSeats) {
+                alert(`Maximum ${maxSeats} seats allowed per booking.`);
+                return;
+            }
+
+            // Select
+            element.classList.add('selected');
+            selectedSeats.push(element.dataset.seatId);
+            updateSelectedCount();
+            updateSummary();
+        }
+
+        function setSeatCount(count) {
+            maxSeats = count;
+            // Update button styles
+            document.querySelectorAll('.seat-count-btn').forEach((btn, index) => {
+                btn.style.borderColor = (index + 1 === count) ? '#ff6b6b' : '#e0e0e0';
+                btn.style.background = (index + 1 === count) ? '#ff6b6b' : 'white';
+                btn.style.color = (index + 1 === count) ? 'white' : '#333';
+            });
+
+            // If selected seats exceed new max, deselect extras
+            while (selectedSeats.length > maxSeats) {
+                const lastSeat = selectedSeats.pop();
+                document.querySelector(`.seat[data-seat-id="${lastSeat}"]`)?.classList.remove('selected');
+            }
+            updateSelectedCount();
+            updateSummary();
+        }
+
+        function updateSelectedCount() {
+            // Show selected seats in UI
+            const seatStr = selectedSeats.length > 0 ? selectedSeats.join(', ') : '-';
+            document.getElementById('sidebarSeats').textContent = seatStr;
+        }
+
+        // ============================================================
+        // SUMMARY UPDATE
+        // ============================================================
+        function updateSummary() {
+            const subtotal = selectedSeats.length * seatPrice;
+            const foodTotal = foodCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const total = subtotal + foodTotal;
+
+            document.getElementById('sidebarSubtotal').textContent = '₹' + subtotal;
+            document.getElementById('sidebarFood').textContent = '₹' + foodTotal;
+            document.getElementById('sidebarTotal').textContent = '₹' + total;
+
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (selectedSeats.length > 0) {
+                proceedBtn.disabled = false;
+                proceedBtn.textContent = `🎫 Pay ₹${total}`;
+            } else {
+                proceedBtn.disabled = true;
+                proceedBtn.textContent = '🎫 Select Seats';
+            }
+        }
+
+        // ============================================================
+        // TIME SELECTION
+        // ============================================================
+        function selectTime(element, time) {
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            document.getElementById('sidebarTime').textContent = time;
+            // Reset seat selection when time changes
+            selectedSeats = [];
+            document.querySelectorAll('.seat.selected').forEach(seat => seat.classList.remove('selected'));
+            updateSelectedCount();
+            updateSummary();
+        }
+
+        // ============================================================
+        // FOOD & BEVERAGE
+        // ============================================================
+        const foodItems = [
+            { id: 1, name: 'Combo 2 (Salted)', desc: 'Salted Popcorn 170g + 2 Coke 450ml', price: 1000, category: 'combos' },
+            { id: 2, name: 'Regular Cheese Popcorn 80g', desc: 'Regular Cheese Popcorn 80g', price: 395, category: 'popcorn' },
+            { id: 3, name: 'Large Nachos With Cheese & Salsa Dip', desc: 'Large Nachos With Cheese & Salsa Dip 90g', price: 345, category: 'snacks' },
+            { id: 4, name: 'Nachos Combo', desc: 'Nachos With Cheese & Salsa 90g + Coke 450ml', price: 620, category: 'combos' },
+            { id: 5, name: 'Combo 1 (Cheese)', desc: 'Cheese Popcorn 180g + Coke 450ml', price: 670, category: 'combos' },
+            { id: 6, name: 'Regular Coke 540ml', desc: 'Regular Coke (540ml)', price: 310, category: 'beverages' },
+            { id: 7, name: 'Combo 2 (Cheese)', desc: 'Cheese Popcorn 170g + 2 Coke 450ml', price: 1050, category: 'combos' },
+            { id: 8, name: 'Medium Cheese Popcorn 170g', desc: 'Medium Cheese Popcorn 170g', price: 545, category: 'popcorn' },
+            { id: 9, name: 'Regular Caramel Popcorn 80g', desc: 'Regular Caramel Popcorn 80g', price: 360, category: 'popcorn' },
+            { id: 10, name: 'Large Coke 810ml', desc: 'Large Coke (810ml)', price: 530, category: 'beverages' },
+            { id: 11, name: 'Chicken Tikka Sandwich', desc: 'Chicken Tikka Sandwich', price: 210, category: 'snacks' },
+            { id: 12, name: 'Medium Salted Popcorn 170g', desc: 'Medium Salted Popcorn 170g', price: 495, category: 'popcorn' },
+        ];
+
+        function renderFoodItems(filter = 'all') {
+            const grid = document.getElementById('foodGrid');
+            grid.innerHTML = '';
+            const filtered = filter === 'all' ? foodItems : foodItems.filter(item => item.category === filter);
+            
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'food-item';
+                const cartItem = foodCart.find(f => f.id === item.id);
+                const qty = cartItem ? cartItem.qty : 0;
+                
+                div.innerHTML = `
+                    <div class="food-info">
+                        <div class="food-name">${item.name}</div>
+                        <div class="food-desc">${item.desc}</div>
+                        <div class="food-price">₹${item.price}</div>
+                    </div>
+                    <div class="food-action">
+                        <button class="qty-btn" onclick="updateFoodQty(${item.id}, -1)" ${qty === 0 ? 'disabled' : ''}>−</button>
+                        <span class="qty-display">${qty}</span>
+                        <button class="qty-btn" onclick="updateFoodQty(${item.id}, 1)">+</button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function updateFoodQty(itemId, delta) {
+            const item = foodItems.find(f => f.id === itemId);
+            if (!item) return;
+
+            const existing = foodCart.find(f => f.id === itemId);
+            if (existing) {
+                existing.qty += delta;
+                if (existing.qty <= 0) {
+                    foodCart = foodCart.filter(f => f.id !== itemId);
+                }
+            } else if (delta > 0) {
+                foodCart.push({ ...item, qty: 1 });
+            }
+
+            renderFoodItems(document.querySelector('.cat-btn.active')?.dataset?.category || 'all');
+            updateSummary();
+        }
+
+        function filterFood(element, category) {
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            renderFoodItems(category);
+        }
+
+        // Food search
+        document.getElementById('foodSearch').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const items = document.querySelectorAll('.food-item');
+            items.forEach(item => {
+                const name = item.querySelector('.food-name')?.textContent?.toLowerCase() || '';
+                const desc = item.querySelector('.food-desc')?.textContent?.toLowerCase() || '';
+                item.style.display = (name.includes(query) || desc.includes(query)) ? 'flex' : 'none';
+            });
+        });
+
+        // ============================================================
+        // PROCEED TO PAYMENT
+        // ============================================================
+        function proceedToPayment() {
+            if (selectedSeats.length === 0) {
+                alert('Please select at least one seat.');
+                return;
+            }
+
+            const total = document.getElementById('sidebarTotal').textContent;
+            if (confirm(`Confirm booking for ${selectedSeats.length} seat(s) - Total ${total}?`)) {
+                // Store booking data and navigate
+                const bookingData = {
+                    movie: document.getElementById('sidebarMovie').textContent,
+                    theatre: document.getElementById('sidebarTheatre').textContent,
+                    date: document.getElementById('sidebarDate').textContent,
+                    time: document.getElementById('sidebarTime').textContent,
+                    seats: selectedSeats.join(', '),
+                    total: total,
+                    food: foodCart
+                };
+                localStorage.setItem('bookingData', JSON.stringify(bookingData));
+                window.location.href = 'booking-confirmation.html';
+            }
+        }
+
+        // ============================================================
+        // LOCATION / SIGN IN
+        // ============================================================
+        function openLocationModal() {
+            const cities = ['Kolhapur', 'Mumbai', 'Pune', 'Hyderabad', 'Delhi', 'Bangalore'];
+            const newCity = prompt(`Select your city:\n${cities.join(', ')}`, 'Kolhapur');
+            if (newCity && cities.includes(newCity)) {
+                document.getElementById('currentLocation').textContent = newCity;
+            }
+        }
+
+        function openSignIn() {
+            alert('Sign In modal would open here');
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSeatMap();
+            renderFoodItems('all');
+            updateSummary();
+            updateSelectedCount();
+
+            // Get movie from URL
+            const params = new URLSearchParams(window.location.search);
+            const movieId = params.get('movieId') || '1';
+            const movieTitles = {
+                1: 'Toxic: A Fairy Tale for Grown-ups (Hindi) - Hindi',
+                2: 'Spider-Man: Brand New Day (English) - English',
+                3: 'Awarapan 2 (Hindi) - Hindi',
+                4: 'Hanuman Ansh (Hindi) - Hindi'
+            };
+            document.getElementById('movieTitle').textContent = movieTitles[movieId] || movieTitles[1];
+        });
+
+        console.log('🎫 Seat Selection page loaded successfully!');
+        console.log('💺 Click on seats to select them.');
+        console.log('🍿 Add food items to your order.');
+        console.log('💰 Total updates automatically.');
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+====================================================================
+SLA-RULES.XML
+Pega Service Level Agreement Rules for Movie Ticket Booking
+Version: 1.0.0
+Author: CineWave Entertainment
+Description: SLA rules for booking confirmation, staff review,
+             notifications, and auto-cancellation
+====================================================================
+-->
+
+<pega-rules>
+    <rule-set name="MovieTicketBooking-SLARules" version="1.0" type="SLARuleSet">
+
+        <!-- ============================================================
+             BOOKING SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Customer Confirmation SLA (15 Minutes) -->
+        <sla-rule id="SLA-BOOK-001" name="CustomerConfirmationSLA"
+                  applies-to="Case-Booking"
+                  stage="CustomerConfirmation"
+                  description="Customer must confirm booking within 15 minutes">
+            
+            <goal-time value="600" unit="SECONDS" /> <!-- 10 minutes -->
+            <deadline-time value="900" unit="SECONDS" /> <!-- 15 minutes -->
+            
+            <goal-action>
+                <description>Send reminder notification at 10 minutes</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>booking-reminder-email</template>
+                        <channels>
+                            <channel type="Email" />
+                            <channel type="SMS" />
+                            <channel type="PushNotification" />
+                        </channels>
+                    </action>
+                    <action type="UpdateStatus">
+                        <status>AwaitingConfirmation</status>
+                        <message>Reminder sent - Please confirm your booking</message>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Auto-cancel booking at 15 minutes</description>
+                <actions>
+                    <action type="AutoCancelBooking">
+                        <reason>Confirmation timeout - 15 minutes exceeded</reason>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>booking-auto-cancelled</template>
+                        <channels>
+                            <channel type="Email" />
+                            <channel type="SMS" />
+                        </channels>
+                        <message>Your booking has been auto-cancelled due to confirmation timeout</message>
+                    </action>
+                    <action type="ReleaseSeats">
+                        <message>Seats released and made available for others</message>
+                    </action>
+                    <action type="UpdateStatus">
+                        <status>Cancelled</status>
+                        <substatus>AutoCancelled</substatus>
+                        <message>Booking auto-cancelled due to confirmation timeout</message>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>BookingAutoCancelled</event>
+                    </action>
+                </actions>
+            </deadline-action>
+
+            <escalations>
+                <escalation level="1" time="300" unit="SECONDS">
+                    <description>First reminder at 5 minutes</description>
+                    <actions>
+                        <action type="SendNotification">
+                            <recipient>Customer</recipient>
+                            <template>booking-reminder-1</template>
+                            <message>Please confirm your booking within 10 minutes</message>
+                        </action>
+                    </actions>
+                </escalation>
+                <escalation level="2" time="600" unit="SECONDS">
+                    <description>Second reminder at 10 minutes</description>
+                    <actions>
+                        <action type="SendNotification">
+                            <recipient>Customer</recipient>
+                            <template>booking-reminder-2</template>
+                            <message>Urgent: Confirm your booking within 5 minutes</message>
+                        </action>
+                        <action type="SendNotification">
+                            <recipient>Staff</recipient>
+                            <template>staff-booking-pending</template>
+                            <message>Booking pending confirmation for 10+ minutes</message>
+                        </action>
+                    </actions>
+                </escalation>
+            </escalations>
+        </sla-rule>
+
+        <!-- Rule: Staff Review SLA -->
+        <sla-rule id="SLA-BOOK-002" name="StaffReviewSLA"
+                  applies-to="Case-Booking"
+                  stage="StaffReview"
+                  description="Staff must review bookings within 30 minutes">
+            
+            <goal-time value="900" unit="SECONDS" /> <!-- 15 minutes -->
+            <deadline-time value="1800" unit="SECONDS" /> <!-- 30 minutes -->
+            
+            <goal-action>
+                <description>Send staff reminder at 15 minutes</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Staff</recipient>
+                        <template>staff-review-reminder</template>
+                        <channels>
+                            <channel type="Email" />
+                            <channel type="InApp" />
+                        </channels>
+                        <message>Pending booking requires review</message>
+                    </action>
+                    <action type="UpdatePriority">
+                        <priority>High</priority>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Escalate to supervisor at 30 minutes</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Supervisor</recipient>
+                        <template>supervisor-escalation</template>
+                        <channels>
+                            <channel type="Email" />
+                            <channel type="InApp" />
+                            <channel type="SMS" />
+                        </channels>
+                        <message>Booking pending review for over 30 minutes. Please escalate.</message>
+                    </action>
+                    <action type="UpdatePriority">
+                        <priority>Critical</priority>
+                    </action>
+                    <action type="UpdateStatus">
+                        <status>PendingReview</status>
+                        <substatus>Escalated</substatus>
+                        <message>Booking escalated to supervisor due to SLA timeout</message>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>StaffReviewEscalated</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- Rule: Payment Processing SLA -->
+        <sla-rule id="SLA-BOOK-003" name="PaymentProcessingSLA"
+                  applies-to="Case-Booking"
+                  stage="PaymentProcessing"
+                  description="Payment must be processed within 10 minutes">
+            
+            <goal-time value="300" unit="SECONDS" /> <!-- 5 minutes -->
+            <deadline-time value="600" unit="SECONDS" /> <!-- 10 minutes -->
+            
+            <goal-action>
+                <description>Send payment reminder at 5 minutes</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>payment-reminder</template>
+                        <message>Please complete your payment within 5 minutes</message>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Cancel booking at 10 minutes if payment not received</description>
+                <actions>
+                    <action type="AutoCancelBooking">
+                        <reason>Payment timeout - 10 minutes exceeded</reason>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>payment-failed-booking-cancelled</template>
+                        <message>Booking cancelled due to payment timeout</message>
+                    </action>
+                    <action type="ReleaseSeats" />
+                    <action type="UpdateStatus">
+                        <status>Cancelled</status>
+                        <substatus>PaymentTimeout</substatus>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>PaymentTimeoutCancellation</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             TICKET CONFIRMATION SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Ticket Generation SLA -->
+        <sla-rule id="SLA-BOOK-004" name="TicketGenerationSLA"
+                  applies-to="Case-Booking"
+                  stage="TicketGeneration"
+                  description="Tickets must be generated within 2 minutes of confirmation">
+            
+            <goal-time value="60" unit="SECONDS" /> <!-- 1 minute -->
+            <deadline-time value="120" unit="SECONDS" /> <!-- 2 minutes -->
+            
+            <goal-action>
+                <description>Generate ticket at 1 minute</description>
+                <actions>
+                    <action type="GenerateTicket">
+                        <format>PDF</format>
+                        <include>QRCode</include>
+                        <include>BookingDetails</include>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>ticket-generated</template>
+                        <attachments>
+                            <attachment type="ticket-pdf" />
+                            <attachment type="qr-code" />
+                        </attachments>
+                        <message>Your e-ticket has been generated</message>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Escalate ticket generation at 2 minutes</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Staff</recipient>
+                        <template>ticket-generation-delay</template>
+                        <message>Ticket generation is taking longer than expected</message>
+                    </action>
+                    <action type="GenerateTicket">
+                        <priority>High</priority>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>TicketGenerationDelayed</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             NOTIFICATION SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Email Notification SLA -->
+        <sla-rule id="SLA-NOT-001" name="EmailNotificationSLA"
+                  applies-to="Case-Notification"
+                  type="Email"
+                  description="Email notifications must be sent within 30 seconds">
+            
+            <goal-time value="15" unit="SECONDS" />
+            <deadline-time value="30" unit="SECONDS" />
+            
+            <goal-action>
+                <description>Send email at 15 seconds</description>
+                <actions>
+                    <action type="SendEmail">
+                        <priority>Normal</priority>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Retry email at 30 seconds</description>
+                <actions>
+                    <action type="RetrySend">
+                        <attempts>3</attempts>
+                        <interval>10</interval>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Staff</recipient>
+                        <template>email-delay-alert</template>
+                        <message>Email notification is delayed</message>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>EmailNotificationDelayed</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- Rule: SMS Notification SLA -->
+        <sla-rule id="SLA-NOT-002" name="SMSNotificationSLA"
+                  applies-to="Case-Notification"
+                  type="SMS"
+                  description="SMS notifications must be sent within 10 seconds">
+            
+            <goal-time value="5" unit="SECONDS" />
+            <deadline-time value="10" unit="SECONDS" />
+            
+            <goal-action>
+                <description>Send SMS at 5 seconds</description>
+                <actions>
+                    <action type="SendSMS">
+                        <priority>High</priority>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Retry SMS at 10 seconds</description>
+                <actions>
+                    <action type="RetrySend">
+                        <attempts>3</attempts>
+                        <interval>5</interval>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>SMSNotificationDelayed</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             SHOW MANAGEMENT SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Show Availability Update SLA -->
+        <sla-rule id="SLA-SHOW-001" name="ShowAvailabilityUpdateSLA"
+                  applies-to="Case-Show"
+                  type="AvailabilityUpdate"
+                  description="Show availability must be updated within 5 seconds of booking">
+            
+            <goal-time value="3" unit="SECONDS" />
+            <deadline-time value="5" unit="SECONDS" />
+            
+            <goal-action>
+                <description>Update availability at 3 seconds</description>
+                <actions>
+                    <action type="UpdateAvailability">
+                        <scope>RealTime</scope>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Force update at 5 seconds</description>
+                <actions>
+                    <action type="UpdateAvailability">
+                        <scope>Force</scope>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>AvailabilityUpdateDelayed</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             PAYMENT GATEWAY SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Payment Gateway Response SLA -->
+        <sla-rule id="SLA-PAY-001" name="PaymentGatewayResponseSLA"
+                  applies-to="Case-Payment"
+                  type="GatewayResponse"
+                  description="Payment gateway must respond within 30 seconds">
+            
+            <goal-time value="15" unit="SECONDS" />
+            <deadline-time value="30" unit="SECONDS" />
+            
+            <goal-action>
+                <description>Process payment at 15 seconds</description>
+                <actions>
+                    <action type="ProcessPayment">
+                        <timeout>15</timeout>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Timeout payment at 30 seconds</description>
+                <actions>
+                    <action type="TimeoutPayment">
+                        <status>Failed</status>
+                        <reason>Gateway response timeout</reason>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>payment-timeout</template>
+                        <message>Payment gateway is taking longer than expected. Please try again.</message>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>PaymentGatewayTimeout</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             STAFF RESPONSE SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Staff Response SLA -->
+        <sla-rule id="SLA-STAFF-001" name="StaffResponseSLA"
+                  applies-to="Case-StaffTask"
+                  type="Response"
+                  description="Staff must respond to customer queries within 2 hours">
+            
+            <goal-time value="3600" unit="SECONDS" /> <!-- 1 hour -->
+            <deadline-time value="7200" unit="SECONDS" /> <!-- 2 hours -->
+            
+            <goal-action>
+                <description>Send staff reminder at 1 hour</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Staff</recipient>
+                        <template>staff-response-reminder</template>
+                        <message>Customer query requires attention</message>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Escalate to supervisor at 2 hours</description>
+                <actions>
+                    <action type="SendNotification">
+                        <recipient>Supervisor</recipient>
+                        <template>staff-escalation</template>
+                        <message>Staff member has not responded to customer query</message>
+                    </action>
+                    <action type="Reassign">
+                        <to>Supervisor</to>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>StaffResponseEscalated</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+        <!-- ============================================================
+             CANCELLATION PROCESSING SLA RULES
+             ============================================================ -->
+
+        <!-- Rule: Cancellation Processing SLA -->
+        <sla-rule id="SLA-CANCEL-001" name="CancellationProcessingSLA"
+                  applies-to="Case-Booking"
+                  type="Cancellation"
+                  description="Cancellation must be processed within 2 minutes">
+            
+            <goal-time value="60" unit="SECONDS" /> <!-- 1 minute -->
+            <deadline-time value="120" unit="SECONDS" /> <!-- 2 minutes -->
+            
+            <goal-action>
+                <description>Process cancellation at 1 minute</description>
+                <actions>
+                    <action type="CancelBooking">
+                        <priority>High</priority>
+                    </action>
+                    <action type="ReleaseSeats" />
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>booking-cancelled</template>
+                        <message>Your booking has been cancelled</message>
+                    </action>
+                </actions>
+            </goal-action>
+
+            <deadline-action>
+                <description>Force cancellation at 2 minutes</description>
+                <actions>
+                    <action type="ForceCancelBooking" />
+                    <action type="ReleaseSeats">
+                        <force>true</force>
+                    </action>
+                    <action type="SendNotification">
+                        <recipient>Customer</recipient>
+                        <template>booking-cancelled</template>
+                        <message>Your booking has been cancelled</message>
+                    </action>
+                    <action type="AddToAuditLog">
+                        <category>SLA</category>
+                        <event>CancellationDelayed</event>
+                    </action>
+                </actions>
+            </deadline-action>
+        </sla-rule>
+
+    </rule-set>
+
+    <!-- ============================================================
+         SLA SUMMARY - RULE TYPES AND DURATIONS
+         ============================================================ -->
+
+    <summary>
+        <sla-category name="CustomerFacing">
+            <description>SLAs that directly impact customer experience</description>
+            <rules>
+                <rule ref="SLA-BOOK-001" />
+                <rule ref="SLA-BOOK-003" />
+                <rule ref="SLA-BOOK-004" />
+                <rule ref="SLA-NOT-001" />
+                <rule ref="SLA-NOT-002" />
+            </rules>
+        </sla-category>
+
+        <sla-category name="StaffOperations">
+            <description>SLAs for staff and internal operations</description>
+            <rules>
+                <rule ref="SLA-BOOK-002" />
+                <rule ref="SLA-STAFF-001" />
+                <rule ref="SLA-CANCEL-001" />
+            </rules>
+        </sla-category>
+
+        <sla-category name="SystemAutomation">
+            <description>SLAs for system automation and integrations</description>
+            <rules>
+                <rule ref="SLA-SHOW-001" />
+                <rule ref="SLA-PAY-001" />
+            </rules>
+        </sla-category>
+    </summary>
+
+    <!-- ============================================================
+         SLA ESCALATION MATRIX
+         ============================================================ -->
+
+    <escalation-matrix>
+        <description>Escalation paths for SLA violations</description>
+        
+        <level level="1">
+            <name>First Level Escalation</name>
+            <actions>
+                <action>Send Reminder Notification</action>
+                <action>Update Task Priority to High</action>
+                <action>Add to Audit Log</action>
+            </actions>
+        </level>
+        
+        <level level="2">
+            <name>Second Level Escalation</name>
+            <actions>
+                <action>Send Urgent Notification</action>
+                <action>Escalate to Supervisor</action>
+                <action>Reassign Task</action>
+                <action>Update Priority to Critical</action>
+                <action>Add to Audit Log</action>
+            </actions>
+        </level>
+        
+        <level level="3">
+            <name>Third Level Escalation</name>
+            <actions>
+                <action>Auto-Cancel/Reject</action>
+                <action>Notify Management</action>
+                <action>Force Update Status</action>
+                <action>Generate Incident Report</action>
+                <action>Add to Audit Log</action>
+            </actions>
+        </level>
+    </escalation-matrix>
+
+</pega-rules>

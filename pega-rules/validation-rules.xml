@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+====================================================================
+VALIDATION-RULES.XML
+Pega Validation Rules for Movie Ticket Booking Management Application
+Version: 1.0.0
+Author: CineWave Entertainment
+Description: Validation rules for customer data, bookings, payments
+====================================================================
+-->
+
+<pega-rules>
+    <rule-set name="MovieTicketBooking-ValidationRules" version="1.0" type="ValidationRuleSet">
+        
+        <!-- ============================================================
+             CUSTOMER VALIDATION RULES
+             ============================================================ -->
+        
+        <!-- Rule: Validate Customer Name -->
+        <validation-rule id="VR-CUST-001" name="ValidateCustomerName" 
+                        applies-to="Data-Booking" 
+                        when="CustomerName" 
+                        severity="ERROR" 
+                        error-message="Customer name is required and must be at least 2 characters">
+            <description>Validates that customer name is provided and meets minimum length requirements</description>
+            <conditions>
+                <condition type="StringLength">
+                    <field>CustomerName</field>
+                    <operator>GREATER_THAN</operator>
+                    <value>1</value>
+                </condition>
+                <condition type="StringPattern">
+                    <field>CustomerName</field>
+                    <pattern>^[a-zA-Z\s.'-]+$</pattern>
+                    <message>Customer name contains invalid characters. Use letters, spaces, dots, apostrophes, or hyphens</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Customer Email -->
+        <validation-rule id="VR-CUST-002" name="ValidateCustomerEmail"
+                        applies-to="Data-Booking"
+                        when="CustomerEmail"
+                        severity="ERROR"
+                        error-message="Valid email address is required">
+            <description>Validates customer email format using regex pattern</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>CustomerEmail</field>
+                    <pattern>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</pattern>
+                </condition>
+                <condition type="StringLength">
+                    <field>CustomerEmail</field>
+                    <operator>LESS_THAN</operator>
+                    <value>255</value>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Customer Phone (Indian Format) -->
+        <validation-rule id="VR-CUST-003" name="ValidateCustomerPhone"
+                        applies-to="Data-Booking"
+                        when="CustomerPhone"
+                        severity="ERROR"
+                        error-message="Valid 10-digit mobile number is required">
+            <description>Validates Indian mobile number (10 digits, starts with 6-9)</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>CustomerPhone</field>
+                    <pattern>^[6-9]\d{9}$</pattern>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Customer Age (For A-Rated Movies) -->
+        <validation-rule id="VR-CUST-004" name="ValidateAgeForARatedMovies"
+                        applies-to="Data-Booking"
+                        when="CustomerAge"
+                        severity="ERROR"
+                        error-message="Customer must be 18 years or older for A-rated movies">
+            <description>Validates age requirement for A-rated movies (18+)</description>
+            <conditions>
+                <condition type="AgeValidation">
+                    <field>CustomerAge</field>
+                    <operator>GREATER_THAN_OR_EQUAL</operator>
+                    <value>18</value>
+                    <message>Age must be 18+ for A-rated content</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- ============================================================
+             BOOKING VALIDATION RULES
+             ============================================================ -->
+
+        <!-- Rule: Validate Booking Reference -->
+        <validation-rule id="VR-BOOK-001" name="ValidateBookingReference"
+                        applies-to="Data-Booking"
+                        when="BookingReference"
+                        severity="ERROR"
+                        error-message="Invalid booking reference format">
+            <description>Validates booking reference format: BK-YYYY-MM-DD-XXXX</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>BookingReference</field>
+                    <pattern>^BK-\d{4}-\d{2}-\d{2}-\d{4}$</pattern>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Show Selection -->
+        <validation-rule id="VR-BOOK-002" name="ValidateShowSelection"
+                        applies-to="Data-Booking"
+                        when="ShowID"
+                        severity="ERROR"
+                        error-message="Show selection is required and must be valid">
+            <description>Validates that a valid show has been selected</description>
+            <conditions>
+                <condition type="NotNull">
+                    <field>ShowID</field>
+                    <message>Please select a show</message>
+                </condition>
+                <condition type="NumericRange">
+                    <field>ShowID</field>
+                    <operator>GREATER_THAN</operator>
+                    <value>0</value>
+                    <message>Invalid show selected</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Seat Count (Min/Max) -->
+        <validation-rule id="VR-BOOK-003" name="ValidateSeatCount"
+                        applies-to="Data-Booking"
+                        when="SelectedSeats"
+                        severity="ERROR"
+                        error-message="Seat count must be between 1 and 10">
+            <description>Validates that seat count is within allowed range (1-10)</description>
+            <conditions>
+                <condition type="MinMax">
+                    <field>SelectedSeatsCount</field>
+                    <min>1</min>
+                    <max>10</max>
+                    <message-min>At least 1 seat must be selected</message-min>
+                    <message-max>Maximum 10 seats allowed per booking</message-max>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Duplicate Seats -->
+        <validation-rule id="VR-BOOK-004" name="ValidateDuplicateSeats"
+                        applies-to="Data-Booking"
+                        when="SelectedSeats"
+                        severity="ERROR"
+                        error-message="Duplicate seats detected in selection">
+            <description>Ensures no duplicate seats are selected</description>
+            <conditions>
+                <condition type="UniqueItems">
+                    <field>SelectedSeats</field>
+                    <message>Duplicate seat selections are not allowed</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Seat Availability -->
+        <validation-rule id="VR-BOOK-005" name="ValidateSeatAvailability"
+                        applies-to="Data-Booking"
+                        when="SelectedSeats"
+                        severity="ERROR"
+                        error-message="One or more selected seats are no longer available">
+            <description>Validates that all selected seats are currently available</description>
+            <conditions>
+                <condition type="CrossReference">
+                    <field>SelectedSeats</field>
+                    <reference>Seat.isAvailable</reference>
+                    <operator>EQUALS</operator>
+                    <value>true</value>
+                    <message>Selected seats must be available</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Booking Amount -->
+        <validation-rule id="VR-BOOK-006" name="ValidateBookingAmount"
+                        applies-to="Data-Booking"
+                        when="TotalAmount"
+                        severity="ERROR"
+                        error-message="Booking amount must be greater than zero">
+            <description>Validates that total booking amount is valid</description>
+            <conditions>
+                <condition type="NumericRange">
+                    <field>TotalAmount</field>
+                    <operator>GREATER_THAN</operator>
+                    <value>0</value>
+                    <message>Total amount must be greater than 0</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Booking Status Transition -->
+        <validation-rule id="VR-BOOK-007" name="ValidateStatusTransition"
+                        applies-to="Data-Booking"
+                        when="BookingStatus"
+                        severity="ERROR"
+                        error-message="Invalid booking status transition">
+            <description>Validates allowed status transitions for bookings</description>
+            <conditions>
+                <condition type="StateMachine">
+                    <field>BookingStatus</field>
+                    <transitions>
+                        <!-- Allowed transitions -->
+                        <transition from="Pending" to="Confirmed" allowed="true" />
+                        <transition from="Pending" to="Cancelled" allowed="true" />
+                        <transition from="Pending" to="Rejected" allowed="true" />
+                        <transition from="Confirmed" to="Completed" allowed="true" />
+                        <transition from="Confirmed" to="Cancelled" allowed="true" />
+                        <!-- Disallowed transitions -->
+                        <transition from="Cancelled" to="Confirmed" allowed="false" message="Cannot confirm a cancelled booking" />
+                        <transition from="Rejected" to="Confirmed" allowed="false" message="Cannot confirm a rejected booking" />
+                        <transition from="Completed" to="Cancelled" allowed="false" message="Cannot cancel a completed booking" />
+                    </transitions>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- ============================================================
+             PAYMENT VALIDATION RULES
+             ============================================================ -->
+
+        <!-- Rule: Validate Payment Amount -->
+        <validation-rule id="VR-PAY-001" name="ValidatePaymentAmount"
+                        applies-to="Data-Payment"
+                        when="Amount"
+                        severity="ERROR"
+                        error-message="Payment amount must match booking total">
+            <description>Validates that payment amount matches the booking total</description>
+            <conditions>
+                <condition type="CrossReference">
+                    <field>Amount</field>
+                    <reference>Booking.TotalAmount</reference>
+                    <operator>EQUALS</operator>
+                    <message>Payment amount must equal the booking total amount</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Payment Method -->
+        <validation-rule id="VR-PAY-002" name="ValidatePaymentMethod"
+                        applies-to="Data-Payment"
+                        when="PaymentMethod"
+                        severity="ERROR"
+                        error-message="Unsupported payment method">
+            <description>Validates that the payment method is supported</description>
+            <conditions>
+                <condition type="Enumeration">
+                    <field>PaymentMethod</field>
+                    <values>
+                        <value>UPI</value>
+                        <value>Credit Card</value>
+                        <value>Debit Card</value>
+                        <value>Net Banking</value>
+                        <value>Wallet</value>
+                        <value>Cash</value>
+                    </values>
+                    <message>Please select a valid payment method</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Card Number -->
+        <validation-rule id="VR-PAY-003" name="ValidateCardNumber"
+                        applies-to="Data-Payment"
+                        when="CardNumber"
+                        severity="ERROR"
+                        error-message="Invalid card number. Must be 13-19 digits">
+            <description>Validates credit/debit card number format and Luhn algorithm</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>CardNumber</field>
+                    <pattern>^\d{13,19}$</pattern>
+                    <message>Card number must be 13-19 digits</message>
+                </condition>
+                <condition type="Custom">
+                    <function>validateCardLuhn</function>
+                    <message>Invalid card number (Luhn check failed)</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Card Expiry -->
+        <validation-rule id="VR-PAY-004" name="ValidateCardExpiry"
+                        applies-to="Data-Payment"
+                        when="CardExpiry"
+                        severity="ERROR"
+                        error-message="Card has expired or expiry date is invalid">
+            <description>Validates card expiry date format and ensures card is not expired</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>CardExpiry</field>
+                    <pattern>^(0[1-9]|1[0-2])/\d{2}$</pattern>
+                    <message>Expiry must be in MM/YY format</message>
+                </condition>
+                <condition type="Custom">
+                    <function>validateCardNotExpired</function>
+                    <message>Card has expired</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate CVV -->
+        <validation-rule id="VR-PAY-005" name="ValidateCVV"
+                        applies-to="Data-Payment"
+                        when="CardCVV"
+                        severity="ERROR"
+                        error-message="CVV must be 3 or 4 digits">
+            <description>Validates CVV format (3 digits for most cards, 4 for Amex)</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>CardCVV</field>
+                    <pattern>^\d{3,4}$</pattern>
+                    <message>CVV must be 3 or 4 digits</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate UPI ID -->
+        <validation-rule id="VR-PAY-006" name="ValidateUPIID"
+                        applies-to="Data-Payment"
+                        when="UPIID"
+                        severity="ERROR"
+                        error-message="Invalid UPI ID format. Example: username@bank">
+            <description>Validates UPI ID format (username@domain)</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>UPIID</field>
+                    <pattern>^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$</pattern>
+                    <message>UPI ID must be in format: username@domain</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Payment Transaction ID -->
+        <validation-rule id="VR-PAY-007" name="ValidateTransactionID"
+                        applies-to="Data-Payment"
+                        when="TransactionID"
+                        severity="ERROR"
+                        error-message="Invalid transaction ID format">
+            <description>Validates transaction ID format</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>TransactionID</field>
+                    <pattern>^[A-Z0-9-]{8,32}$</pattern>
+                    <message>Transaction ID must be 8-32 alphanumeric characters with hyphens</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- ============================================================
+             SHOW VALIDATION RULES
+             ============================================================ -->
+
+        <!-- Rule: Validate Show Date -->
+        <validation-rule id="VR-SHOW-001" name="ValidateShowDate"
+                        applies-to="Data-Show"
+                        when="ShowDate"
+                        severity="ERROR"
+                        error-message="Show date must be in the future">
+            <description>Ensures shows are scheduled for future dates</description>
+            <conditions>
+                <condition type="DateRange">
+                    <field>ShowDate</field>
+                    <operator>GREATER_THAN_OR_EQUAL</operator>
+                    <value>currentDate</value>
+                    <message>Show date must be today or in the future</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Show Time -->
+        <validation-rule id="VR-SHOW-002" name="ValidateShowTime"
+                        applies-to="Data-Show"
+                        when="ShowTime"
+                        severity="ERROR"
+                        error-message="Show time must be between 6:00 AM and 11:59 PM">
+            <description>Validates show time is within operating hours</description>
+            <conditions>
+                <condition type="TimeRange">
+                    <field>ShowTime</field>
+                    <min>06:00</min>
+                    <max>23:59</max>
+                    <message>Show time must be between 6:00 AM and 11:59 PM</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Ticket Price -->
+        <validation-rule id="VR-SHOW-003" name="ValidateTicketPrice"
+                        applies-to="Data-Show"
+                        when="TicketPrice"
+                        severity="ERROR"
+                        error-message="Ticket price must be between ₹50 and ₹1000">
+            <description>Validates ticket price is within reasonable range</description>
+            <conditions>
+                <condition type="NumericRange">
+                    <field>TicketPrice</field>
+                    <operator>BETWEEN</operator>
+                    <min>50</min>
+                    <max>1000</max>
+                    <message>Ticket price must be between ₹50 and ₹1000</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- ============================================================
+             THEATRE VALIDATION RULES
+             ============================================================ -->
+
+        <!-- Rule: Validate Theatre Name -->
+        <validation-rule id="VR-THR-001" name="ValidateTheatreName"
+                        applies-to="Data-Theatre"
+                        when="TheatreName"
+                        severity="ERROR"
+                        error-message="Theatre name is required (minimum 3 characters)">
+            <description>Validates theatre name is provided and meets requirements</description>
+            <conditions>
+                <condition type="StringLength">
+                    <field>TheatreName</field>
+                    <operator>GREATER_THAN</operator>
+                    <value>2</value>
+                    <message>Theatre name must be at least 3 characters</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate City -->
+        <validation-rule id="VR-THR-002" name="ValidateCity"
+                        applies-to="Data-Theatre"
+                        when="City"
+                        severity="ERROR"
+                        error-message="City is required">
+            <description>Validates city is provided</description>
+            <conditions>
+                <condition type="NotNull">
+                    <field>City</field>
+                    <message>Please enter the city</message>
+                </condition>
+                <condition type="StringLength">
+                    <field>City</field>
+                    <operator>GREATER_THAN</operator>
+                    <value>1</value>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- ============================================================
+             SEAT VALIDATION RULES
+             ============================================================ -->
+
+        <!-- Rule: Validate Seat Number -->
+        <validation-rule id="VR-SEAT-001" name="ValidateSeatNumber"
+                        applies-to="Data-Seat"
+                        when="SeatNumber"
+                        severity="ERROR"
+                        error-message="Seat number must be in format: A01, B12, etc.">
+            <description>Validates seat number format</description>
+            <conditions>
+                <condition type="RegEx">
+                    <field>SeatNumber</field>
+                    <pattern>^[A-Z]\d{2}$</pattern>
+                    <message>Seat number must be a letter followed by 2 digits (e.g., A01)</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Unique Seat per Show -->
+        <validation-rule id="VR-SEAT-002" name="ValidateUniqueSeat"
+                        applies-to="Data-Seat"
+                        when="SeatNumber"
+                        severity="ERROR"
+                        error-message="Seat already exists for this show">
+            <description>Ensures seat numbers are unique per show</description>
+            <conditions>
+                <condition type="Uniqueness">
+                    <fields>
+                        <field>ShowID</field>
+                        <field>SeatNumber</field>
+                    </fields>
+                    <message>This seat number is already taken for this show</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+        <!-- Rule: Validate Seat Type -->
+        <validation-rule id="VR-SEAT-003" name="ValidateSeatType"
+                        applies-to="Data-Seat"
+                        when="SeatType"
+                        severity="ERROR"
+                        error-message="Invalid seat type. Must be: Classic, Prime, Recliner, VIP, or Wheelchair">
+            <description>Validates seat type is from allowed list</description>
+            <conditions>
+                <condition type="Enumeration">
+                    <field>SeatType</field>
+                    <values>
+                        <value>Classic</value>
+                        <value>Prime</value>
+                        <value>Recliner</value>
+                        <value>VIP</value>
+                        <value>Wheelchair</value>
+                    </values>
+                    <message>Please select a valid seat type</message>
+                </condition>
+            </conditions>
+        </validation-rule>
+
+    </rule-set>
+
+    <!-- ============================================================
+         CUSTOM VALIDATION FUNCTIONS
+         ============================================================ -->
+    
+    <functions>
+        <!-- Luhn Algorithm for Card Validation -->
+        <function name="validateCardLuhn" return-type="Boolean">
+            <description>Validates card number using Luhn algorithm</description>
+            <parameters>
+                <parameter name="cardNumber" type="String" />
+            </parameters>
+            <script><![CDATA[
+                var nCheck = 0, nDigit = 0, bEven = false;
+                var value = cardNumber.replace(/\s/g, '');
+                
+                for (var n = value.length - 1; n >= 0; n--) {
+                    var cDigit = value.charAt(n);
+                    var nDigit = parseInt(cDigit, 10);
+                    
+                    if (bEven) {
+                        if ((nDigit *= 2) > 9) nDigit -= 9;
+                    }
+                    
+                    nCheck += nDigit;
+                    bEven = !bEven;
+                }
+                
+                return (nCheck % 10) == 0;
+            ]]></script>
+        </function>
+
+        <!-- Card Expiry Validation -->
+        <function name="validateCardNotExpired" return-type="Boolean">
+            <description>Validates that card expiry is in the future</description>
+            <parameters>
+                <parameter name="expiry" type="String" />
+            </parameters>
+            <script><![CDATA[
+                var parts = expiry.split('/');
+                var month = parseInt(parts[0]);
+                var year = parseInt(parts[1]) + 2000;
+                
+                var now = new Date();
+                var currentYear = now.getFullYear();
+                var currentMonth = now.getMonth() + 1;
+                
+                if (year > currentYear) return true;
+                if (year === currentYear && month >= currentMonth) return true;
+                return false;
+            ]]></script>
+        </function>
+
+        <!-- Age Validation -->
+        <function name="validateAge" return-type="Boolean">
+            <description>Validates customer age</description>
+            <parameters>
+                <parameter name="age" type="Integer" />
+                <parameter name="minAge" type="Integer" />
+            </parameters>
+            <script><![CDATA[
+                return age >= minAge;
+            ]]></script>
+        </function>
+
+        <!-- Cross-Reference Validation -->
+        <function name="validateCrossReference" return-type="Boolean">
+            <description>Validates cross-reference between fields</description>
+            <parameters>
+                <parameter name="value" type="Any" />
+                <parameter name="reference" type="Any" />
+                <parameter name="operator" type="String" />
+            </parameters>
+            <script><![CDATA[
+                switch(operator) {
+                    case 'EQUALS': return value === reference;
+                    case 'NOT_EQUALS': return value !== reference;
+                    case 'GREATER_THAN': return value > reference;
+                    case 'LESS_THAN': return value < reference;
+                    case 'CONTAINS': return reference.indexOf(value) !== -1;
+                    default: return false;
+                }
+            ]]></script>
+        </function>
+    </functions>
+
+    <!-- ============================================================
+         VALIDATION RULE SETS (Grouped by Use Case)
+         ============================================================ -->
+    
+    <rule-sets>
+        <!-- Customer Registration Validation Set -->
+        <rule-set name="CustomerValidationSet">
+            <description>Validation rules for customer registration and profile</description>
+            <rules>
+                <rule ref="VR-CUST-001" />
+                <rule ref="VR-CUST-002" />
+                <rule ref="VR-CUST-003" />
+                <rule ref="VR-CUST-004" />
+            </rules>
+        </rule-set>
+
+        <!-- Booking Creation Validation Set -->
+        <rule-set name="BookingValidationSet">
+            <description>Validation rules for booking creation</description>
+            <rules>
+                <rule ref="VR-CUST-001" />
+                <rule ref="VR-CUST-002" />
+                <rule ref="VR-CUST-003" />
+                <rule ref="VR-BOOK-002" />
+                <rule ref="VR-BOOK-003" />
+                <rule ref="VR-BOOK-004" />
+                <rule ref="VR-BOOK-005" />
+                <rule ref="VR-BOOK-006" />
+            </rules>
+        </rule-set>
+
+        <!-- Payment Validation Set -->
+        <rule-set name="PaymentValidationSet">
+            <description>Validation rules for payment processing</description>
+            <rules>
+                <rule ref="VR-PAY-001" />
+                <rule ref="VR-PAY-002" />
+                <rule ref="VR-PAY-003" />
+                <rule ref="VR-PAY-004" />
+                <rule ref="VR-PAY-005" />
+                <rule ref="VR-PAY-006" />
+                <rule ref="VR-PAY-007" />
+            </rules>
+        </rule-set>
+
+        <!-- Show Management Validation Set -->
+        <rule-set name="ShowManagementValidationSet">
+            <description>Validation rules for show management</description>
+            <rules>
+                <rule ref="VR-SHOW-001" />
+                <rule ref="VR-SHOW-002" />
+                <rule ref="VR-SHOW-003" />
+            </rules>
+        </rule-set>
+
+        <!-- Theatre Management Validation Set -->
+        <rule-set name="TheatreManagementValidationSet">
+            <description>Validation rules for theatre management</description>
+            <rules>
+                <rule ref="VR-THR-001" />
+                <rule ref="VR-THR-002" />
+            </rules>
+        </rule-set>
+
+        <!-- Seat Management Validation Set -->
+        <rule-set name="SeatManagementValidationSet">
+            <description>Validation rules for seat management</description>
+            <rules>
+                <rule ref="VR-SEAT-001" />
+                <rule ref="VR-SEAT-002" />
+                <rule ref="VR-SEAT-003" />
+            </rules>
+        </rule-set>
+    </rule-sets>
+
+</pega-rules>

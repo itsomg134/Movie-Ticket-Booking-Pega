@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - BookMyShow</title>
+    <style>
+        /* ============================================================
+           INHERITED STYLES (Minimal, mostly custom)
+           ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f5f5; color: #333; }
+        
+        .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
+        .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 24px; font-weight: 700; color: #ff6b6b; }
+        .logo span { color: white; font-weight: 300; }
+        .logo-icon { font-size: 32px; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .btn-signin { background: #ff6b6b; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-signin:hover { background: #ff5252; }
+
+        .main-content { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+
+        /* ============================================================
+           CONFIRMATION CARD
+           ============================================================ */
+        .confirmation-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .confirmation-card .success-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            animation: bounceIn 0.6s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .confirmation-card .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .confirmation-card .success-sub {
+            font-size: 16px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-card .booking-ref {
+            display: inline-block;
+            background: #f8f9fa;
+            padding: 8px 24px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .confirmation-card .booking-ref .label {
+            font-weight: 400;
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* ============================================================
+           DETAILS GRID
+           ============================================================ */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        .details-grid .detail-item {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .details-grid .detail-item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .details-grid .detail-item .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* ============================================================
+           TICKET DISPLAY
+           ============================================================ */
+        .ticket-display {
+            background: linear-gradient(135deg, #1a1a2e, #2d3436);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: left;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-display::before {
+            content: '🎬';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 120px;
+            opacity: 0.05;
+        }
+
+        .ticket-display .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .ticket-display .ticket-header .ticket-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .ticket-display .ticket-header .ticket-badge {
+            background: #ff6b6b;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .ticket-display .ticket-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+
+        .ticket-display .ticket-row:last-child {
+            border-bottom: none;
+        }
+
+        .ticket-display .ticket-row .ticket-label {
+            opacity: 0.6;
+        }
+
+        .ticket-display .ticket-row .ticket-value {
+            font-weight: 600;
+        }
+
+        .ticket-display .ticket-qr {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+
+        .ticket-display .ticket-qr .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           SEAT DETAILS
+           ============================================================ */
+        .seat-badge-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+
+        .seat-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           ACTIONS
+           ============================================================ */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn-primary {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-buttons .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,107,0.3);
+        }
+
+        .action-buttons .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-buttons .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* ============================================================
+           EMAIL/SMS SECTION
+           ============================================================ */
+        .contact-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .contact-section .contact-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+
+        .contact-section .contact-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .contact-section .contact-form input {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .contact-section .contact-form input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        .contact-section .contact-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .contact-section .contact-form .btn-submit {
+            grid-column: 1 / -1;
+            padding: 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .contact-section .contact-form .btn-submit:hover {
+            background: #ff5252;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            .header { padding: 10px 16px; }
+            .main-content { padding: 0 12px; margin: 20px auto; }
+            .confirmation-card { padding: 24px; }
+            .details-grid { grid-template-columns: 1fr; }
+            .confirmation-card .success-title { font-size: 22px; }
+            .contact-section .contact-form { grid-template-columns: 1fr; }
+            .contact-section .contact-form .full-width { grid-column: 1; }
+            .action-buttons { flex-direction: column; align-items: stretch; }
+            .ticket-display { padding: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .confirmation-card { padding: 16px; }
+            .confirmation-card .success-icon { font-size: 48px; }
+            .confirmation-card .success-title { font-size: 18px; }
+            .ticket-display .ticket-row { font-size: 12px; flex-wrap: wrap; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='homepage.html'">
+            <span class="logo-icon">🎬</span>
+            <span>Book<span>MyShow</span></span>
+        </div>
+        <div class="header-right">
+            <span style="opacity:0.8;">📧 booking@bookmyshow.com</span>
+            <button class="btn-signin" onclick="window.location.href='homepage.html'">🏠 Home</button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <div class="main-content">
+
+        <div class="confirmation-card">
+            <!-- Success Icon -->
+            <div class="success-icon">✅</div>
+            <h1 class="success-title">Booking Confirmed! 🎉</h1>
+            <p class="success-sub">Your tickets have been booked successfully. Check your email for the e-ticket.</p>
+
+            <!-- Booking Reference -->
+            <div class="booking-ref">
+                <span class="label">Booking ID</span> BK-2026-08-0042
+            </div>
+
+            <!-- Details Grid -->
+            <div class="details-grid" id="detailsGrid">
+                <div class="detail-item">
+                    <div class="label">Movie</div>
+                    <div class="value" id="confirmMovie">Toxic: A Fairy Tale for Grown-ups</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Theatre</div>
+                    <div class="value" id="confirmTheatre">INOX: Reliance Mega Mall, Kolhapur</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Date & Time</div>
+                    <div class="value" id="confirmDateTime">Sun, 30 Aug 2026 · 08:00 AM</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Seats</div>
+                    <div class="value" id="confirmSeats">
+                        <div class="seat-badge-container">
+                            <span class="seat-badge">A04</span>
+                            <span class="seat-badge">A05</span>
+                            <span class="seat-badge">A06</span>
+                            <span class="seat-badge">A07</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Total Amount</div>
+                    <div class="value" style="color: #ff6b6b; font-size: 20px;" id="confirmTotal">₹880</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Payment Status</div>
+                    <div class="value" style="color: #00b894;">✅ Paid via UPI</div>
+                </div>
+            </div>
+
+            <!-- Ticket Display -->
+            <div class="ticket-display">
+                <div class="ticket-header">
+                    <span class="ticket-title">🎫 E-Ticket</span>
+                    <span class="ticket-badge">CONFIRMED</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Movie</span>
+                    <span class="ticket-value" id="ticketMovie">Toxic: A Fairy Tale for Grown-ups</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Theatre</span>
+                    <span class="ticket-value" id="ticketTheatre">INOX: Reliance Mega Mall, Kolhapur</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Date</span>
+                    <span class="ticket-value" id="ticketDate">Sun, 30 Aug 2026</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Time</span>
+                    <span class="ticket-value" id="ticketTime">08:00 AM</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Seats</span>
+                    <span class="ticket-value" id="ticketSeats">A04, A05, A06, A07</span>
+                </div>
+                <div class="ticket-row">
+                    <span class="ticket-label">Booking ID</span>
+                    <span class="ticket-value">BK-2026-08-0042</span>
+                </div>
+
+                <div class="ticket-qr">
+                    <div class="qr-placeholder">
+                        <span style="font-size: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; line-height: 1.4;">
+                            📱<br>QR<br>Code
+                        </span>
+                    </div>
+                </div>
+                <div style="text-align: center; font-size: 11px; opacity: 0.5; margin-top: 8px;">
+                    Scan this QR code at the cinema entrance
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="downloadTicket()">
+                    📥 Download Ticket
+                </button>
+                <button class="btn-secondary" onclick="shareTicket()">
+                    📤 Share
+                </button>
+                <button class="btn-secondary" onclick="window.location.href='homepage.html'">
+                    🏠 Back to Home
+                </button>
+            </div>
+
+            <!-- Contact Details Form -->
+            <div class="contact-section">
+                <div class="contact-title">📧 Get your ticket on email & SMS</div>
+                <div class="contact-form">
+                    <input type="email" placeholder="Your Email *" id="confirmEmail" value="john.doe@email.com" class="full-width">
+                    <input type="tel" placeholder="Mobile Number *" id="confirmPhone" value="9876543210" class="full-width">
+                    <button class="btn-submit" onclick="sendTicket()">
+                        📨 Send Ticket
+                    </button>
+                    <p style="grid-column: 1 / -1; font-size: 12px; color: #888; text-align: center; margin-top: 4px;">
+                        This number will only be used for sending ticket(s)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div style="margin-top: 20px; font-size: 12px; color: #aaa; border-top: 1px solid #f0f0f0; padding-top: 16px;">
+                <p>📋 <strong>Terms & Conditions:</strong></p>
+                <ul style="list-style: none; text-align: left; padding: 8px 0; font-size: 11px; color: #888; line-height: 1.6;">
+                    <li>✓ Seat layouts shown are indicative; actual auditorium layouts may vary.</li>
+                    <li>✓ Tickets are mandatory for children aged 3+.</li>
+                    <li>✓ Entry is restricted for patrons below 18 years for A certified films.</li>
+                    <li>✓ Outside food & beverages are strictly prohibited.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // LOAD BOOKING DATA
+        // ============================================================
+        function loadBookingData() {
+            try {
+                const data = JSON.parse(localStorage.getItem('bookingData'));
+                if (data) {
+                    document.getElementById('confirmMovie').textContent = data.movie || 'Toxic: A Fairy Tale for Grown-ups';
+                    document.getElementById('confirmTheatre').textContent = data.theatre || 'INOX: Reliance Mega Mall, Kolhapur';
+                    document.getElementById('confirmDateTime').textContent = data.date + ' · ' + data.time;
+                    document.getElementById('confirmSeats').innerHTML = 
+                        `<div class="seat-badge-container">${data.seats.split(',').map(s => `<span class="seat-badge">${s.trim()}</span>`).join('')}</div>`;
+                    document.getElementById('confirmTotal').textContent = data.total || '₹880';
+                    document.getElementById('ticketMovie').textContent = data.movie || 'Toxic: A Fairy Tale for Grown-ups';
+                    document.getElementById('ticketTheatre').textContent = data.theatre || 'INOX: Reliance Mega Mall, Kolhapur';
+                    document.getElementById('ticketDate').textContent = data.date || 'Sun, 30 Aug 2026';
+                    document.getElementById('ticketTime').textContent = data.time || '08:00 AM';
+                    document.getElementById('ticketSeats').textContent = data.seats || 'A04, A05, A06, A07';
+                }
+            } catch (e) {
+                console.log('Using default booking data');
+            }
+        }
+
+        // ============================================================
+        // ACTIONS
+        // ============================================================
+
+        function downloadTicket() {
+            alert('📥 Downloading ticket as PDF...\n\nThis would generate a PDF with:\n- QR Code\n- Booking details\n- Seat information');
+            // In production: Generate PDF using jsPDF or similar
+            console.log('Ticket downloaded');
+        }
+
+        function shareTicket() {
+            const data = JSON.parse(localStorage.getItem('bookingData')) || {};
+            const message = `🎬 Booking Confirmed!\nMovie: ${data.movie || 'Toxic'}\nSeats: ${data.seats || 'A04, A05, A06, A07'}\nTotal: ${data.total || '₹880'}\n\nThank you for booking with BookMyShow!`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Movie Ticket',
+                    text: message,
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(message);
+                alert('📋 Booking details copied to clipboard!');
+            }
+        }
+
+        function sendTicket() {
+            const email = document.getElementById('confirmEmail').value;
+            const phone = document.getElementById('confirmPhone').value;
+
+            if (!email || !phone) {
+                alert('Please fill in both email and phone number.');
+                return;
+            }
+
+            if (!email.includes('@') || !email.includes('.')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            if (phone.length < 10) {
+                alert('Please enter a valid 10-digit mobile number.');
+                return;
+            }
+
+            // Simulate sending
+            alert(`📨 Ticket sent to:\n📧 ${email}\n📱 ${phone}\n\nCheck your email/SMS for the e-ticket!`);
+            console.log(`Ticket sent to ${email} and ${phone}`);
+        }
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.location.href = 'homepage.html';
+            }
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                downloadTicket();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                shareTicket();
+            }
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBookingData();
+            console.log('✅ Booking Confirmation page loaded!');
+            console.log('💡 Press ESC to go home, Ctrl+D to download, Ctrl+S to share');
+        });
+    </script>
+</body>
+</html>

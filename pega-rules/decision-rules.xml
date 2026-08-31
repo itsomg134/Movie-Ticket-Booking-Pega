@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+====================================================================
+DECISION-RULES.XML
+Pega Decision Rules for Movie Ticket Booking Management
+Version: 1.0.0
+Author: CineWave Entertainment
+Description: Decision tables, decision trees, and business rules
+             for pricing, routing, eligibility, and discounts
+====================================================================
+-->
+
+<pega-rules>
+    <rule-set name="MovieTicketBooking-DecisionRules" version="1.0" type="DecisionRuleSet">
+
+        <!-- ============================================================
+             PRICING DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Calculate Ticket Price by Seat Type -->
+        <decision-table id="DT-PRICE-001" name="CalculateTicketPrice"
+                        applies-to="Data-Seat"
+                        description="Determines ticket price based on seat type, show time, and day">
+            
+            <input-fields>
+                <field name="SeatType" type="String" />
+                <field name="ShowTime" type="String" />
+                <field name="DayOfWeek" type="String" />
+                <field name="MovieRating" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="BasePrice" type="Number" />
+                <field name="WeekendSurcharge" type="Number" />
+                <field name="PrimeTimeSurcharge" type="Number" />
+                <field name="FinalPrice" type="Number" />
+            </output-fields>
+
+            <rules>
+                <!-- Standard Pricing -->
+                <rule id="DT-PRICE-001-R1">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Classic" />
+                            <condition field="DayOfWeek" operator="IN" values="Monday,Tuesday,Wednesday,Thursday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="06:00" max="18:00" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>180</BasePrice>
+                        <WeekendSurcharge>0</WeekendSurcharge>
+                        <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                        <FinalPrice>180</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R2">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Classic" />
+                            <condition field="DayOfWeek" operator="EQUALS" value="Friday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="06:00" max="18:00" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>180</BasePrice>
+                        <WeekendSurcharge>20</WeekendSurcharge>
+                        <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                        <FinalPrice>200</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Classic" />
+                            <condition field="DayOfWeek" operator="IN" values="Friday,Saturday,Sunday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="18:00" max="23:59" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>180</BasePrice>
+                        <WeekendSurcharge>30</WeekendSurcharge>
+                        <PrimeTimeSurcharge>20</PrimeTimeSurcharge>
+                        <FinalPrice>230</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R4">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Prime" />
+                            <condition field="DayOfWeek" operator="EQUALS" value="Monday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="06:00" max="18:00" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>220</BasePrice>
+                        <WeekendSurcharge>0</WeekendSurcharge>
+                        <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                        <FinalPrice>220</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R5">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Prime" />
+                            <condition field="DayOfWeek" operator="IN" values="Saturday,Sunday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="18:00" max="23:59" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>220</BasePrice>
+                        <WeekendSurcharge>40</WeekendSurcharge>
+                        <PrimeTimeSurcharge>30</PrimeTimeSurcharge>
+                        <FinalPrice>290</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R6">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Recliner" />
+                            <condition field="DayOfWeek" operator="IN" values="Monday,Tuesday,Wednesday,Thursday" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>350</BasePrice>
+                        <WeekendSurcharge>0</WeekendSurcharge>
+                        <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                        <FinalPrice>350</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R7">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Recliner" />
+                            <condition field="DayOfWeek" operator="IN" values="Friday,Saturday,Sunday" />
+                            <condition field="ShowTime" operator="BETWEEN" min="18:00" max="23:59" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>350</BasePrice>
+                        <WeekendSurcharge>50</WeekendSurcharge>
+                        <PrimeTimeSurcharge>40</PrimeTimeSurcharge>
+                        <FinalPrice>440</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R8">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="VIP" />
+                            <condition field="DayOfWeek" operator="EQUALS" value="Monday" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>450</BasePrice>
+                        <WeekendSurcharge>0</WeekendSurcharge>
+                        <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                        <FinalPrice>450</FinalPrice>
+                    </output>
+                </rule>
+
+                <rule id="DT-PRICE-001-R9">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="VIP" />
+                            <condition field="DayOfWeek" operator="IN" values="Saturday,Sunday" />
+                        </and>
+                    </condition>
+                    <output>
+                        <BasePrice>450</BasePrice>
+                        <WeekendSurcharge>60</WeekendSurcharge>
+                        <PrimeTimeSurcharge>40</PrimeTimeSurcharge>
+                        <FinalPrice>550</FinalPrice>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <BasePrice>200</BasePrice>
+                    <WeekendSurcharge>0</WeekendSurcharge>
+                    <PrimeTimeSurcharge>0</PrimeTimeSurcharge>
+                    <FinalPrice>200</FinalPrice>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- Rule: Apply Discounts and Offers -->
+        <decision-table id="DT-PRICE-002" name="ApplyDiscountsAndOffers"
+                        applies-to="Data-Booking"
+                        description="Applies discounts based on coupon codes, bulk booking, and member status">
+            
+            <input-fields>
+                <field name="CouponCode" type="String" />
+                <field name="SeatCount" type="Number" />
+                <field name="IsMember" type="Boolean" />
+                <field name="TotalAmount" type="Number" />
+                <field name="BookingDay" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="DiscountType" type="String" />
+                <field name="DiscountPercent" type="Number" />
+                <field name="DiscountAmount" type="Number" />
+                <field name="FinalAmount" type="Number" />
+            </output-fields>
+
+            <rules>
+                <!-- B1G1 Offer -->
+                <rule id="DT-PRICE-002-R1">
+                    <condition>
+                        <and>
+                            <condition field="CouponCode" operator="EQUALS" value="B1G1" />
+                            <condition field="SeatCount" operator="GREATER_THAN_OR_EQUAL" value="2" />
+                            <condition field="TotalAmount" operator="GREATER_THAN" value="0" />
+                        </and>
+                    </condition>
+                    <output>
+                        <DiscountType>Buy One Get One</DiscountType>
+                        <DiscountPercent>50</DiscountPercent>
+                        <DiscountAmount>${TotalAmount/2}</DiscountAmount>
+                        <FinalAmount>${TotalAmount - (TotalAmount/2)}</FinalAmount>
+                    </output>
+                </rule>
+
+                <!-- MUNCH50 Coupon -->
+                <rule id="DT-PRICE-002-R2">
+                    <condition>
+                        <and>
+                            <condition field="CouponCode" operator="EQUALS" value="MUNCH50" />
+                            <condition field="TotalAmount" operator="GREATER_THAN" value="0" />
+                        </and>
+                    </condition>
+                    <output>
+                        <DiscountType>Food Discount</DiscountType>
+                        <DiscountPercent>10</DiscountPercent>
+                        <DiscountAmount>${TotalAmount * 0.10}</DiscountAmount>
+                        <FinalAmount>${TotalAmount - (TotalAmount * 0.10)}</FinalAmount>
+                    </output>
+                </rule>
+
+                <!-- Bulk Booking Discount (5+ seats) -->
+                <rule id="DT-PRICE-002-R3">
+                    <condition>
+                        <and>
+                            <condition field="SeatCount" operator="GREATER_THAN_OR_EQUAL" value="5" />
+                            <condition field="CouponCode" operator="IS_NULL" />
+                        </and>
+                    </condition>
+                    <output>
+                        <DiscountType>Bulk Discount</DiscountType>
+                        <DiscountPercent>10</DiscountPercent>
+                        <DiscountAmount>${TotalAmount * 0.10}</DiscountAmount>
+                        <FinalAmount>${TotalAmount - (TotalAmount * 0.10)}</FinalAmount>
+                    </output>
+                </rule>
+
+                <!-- Member Discount (5% off) -->
+                <rule id="DT-PRICE-002-R4">
+                    <condition>
+                        <and>
+                            <condition field="IsMember" operator="EQUALS" value="true" />
+                            <condition field="CouponCode" operator="IS_NULL" />
+                            <condition field="SeatCount" operator="LESS_THAN" value="5" />
+                        </and>
+                    </condition>
+                    <output>
+                        <DiscountType>Member Discount</DiscountType>
+                        <DiscountPercent>5</DiscountPercent>
+                        <DiscountAmount>${TotalAmount * 0.05}</DiscountAmount>
+                        <FinalAmount>${TotalAmount - (TotalAmount * 0.05)}</FinalAmount>
+                    </output>
+                </rule>
+
+                <!-- Early Bird Discount (7 days advance) -->
+                <rule id="DT-PRICE-002-R5">
+                    <condition>
+                        <and>
+                            <condition field="BookingDay" operator="BETWEEN" min="7" max="30" />
+                            <condition field="CouponCode" operator="IS_NULL" />
+                        </and>
+                    </condition>
+                    <output>
+                        <DiscountType>Early Bird</DiscountType>
+                        <DiscountPercent>15</DiscountPercent>
+                        <DiscountAmount>${TotalAmount * 0.15}</DiscountAmount>
+                        <FinalAmount>${TotalAmount - (TotalAmount * 0.15)}</FinalAmount>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <DiscountType>No Discount</DiscountType>
+                    <DiscountPercent>0</DiscountPercent>
+                    <DiscountAmount>0</DiscountAmount>
+                    <FinalAmount>${TotalAmount}</FinalAmount>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             ROUTING DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Route Booking by Show Type -->
+        <decision-table id="DT-ROUTE-001" name="RouteBookingByShowType"
+                        applies-to="Case-Booking"
+                        description="Routes booking to appropriate staff based on show type and priority">
+            
+            <input-fields>
+                <field name="ShowType" type="String" />
+                <field name="MovieRating" type="String" />
+                <field name="SeatCount" type="Number" />
+                <field name="IsVIP" type="Boolean" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="AssignedTeam" type="String" />
+                <field name="Priority" type="String" />
+                <field name="AssignedStaff" type="String" />
+                <field name="ResponseTime" type="String" />
+            </output-fields>
+
+            <rules>
+                <!-- Premiere/New Release -->
+                <rule id="DT-ROUTE-001-R1">
+                    <condition>
+                        <or>
+                            <condition field="ShowType" operator="EQUALS" value="Premiere" />
+                            <condition field="ShowType" operator="EQUALS" value="New Release" />
+                            <condition field="ShowType" operator="EQUALS" value="Opening Day" />
+                        </or>
+                    </condition>
+                    <output>
+                        <AssignedTeam>Senior Staff</AssignedTeam>
+                        <Priority>High</Priority>
+                        <AssignedStaff>Specialist</AssignedStaff>
+                        <ResponseTime>5 minutes</ResponseTime>
+                    </output>
+                </rule>
+
+                <!-- IMAX/3D Shows -->
+                <rule id="DT-ROUTE-001-R2">
+                    <condition>
+                        <or>
+                            <condition field="ShowType" operator="EQUALS" value="IMAX" />
+                            <condition field="ShowType" operator="EQUALS" value="3D" />
+                            <condition field="ShowType" operator="EQUALS" value="4D" />
+                        </or>
+                    </condition>
+                    <output>
+                        <AssignedTeam>Technical Staff</AssignedTeam>
+                        <Priority>High</Priority>
+                        <AssignedStaff>Technical Lead</AssignedStaff>
+                        <ResponseTime>10 minutes</ResponseTime>
+                    </output>
+                </rule>
+
+                <!-- VIP Bookings -->
+                <rule id="DT-ROUTE-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="IsVIP" operator="EQUALS" value="true" />
+                            <condition field="SeatCount" operator="GREATER_THAN" value="5" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AssignedTeam>VIP Team</AssignedTeam>
+                        <Priority>Critical</Priority>
+                        <AssignedStaff>VIP Coordinator</AssignedStaff>
+                        <ResponseTime>2 minutes</ResponseTime>
+                    </output>
+                </rule>
+
+                <!-- International Films -->
+                <rule id="DT-ROUTE-001-R4">
+                    <condition>
+                        <or>
+                            <condition field="MovieRating" operator="EQUALS" value="International" />
+                            <condition field="MovieRating" operator="EQUALS" value="Foreign Language" />
+                        </or>
+                    </condition>
+                    <output>
+                        <AssignedTeam>International Team</AssignedTeam>
+                        <Priority>Medium</Priority>
+                        <AssignedStaff>Language Specialist</AssignedStaff>
+                        <ResponseTime>15 minutes</ResponseTime>
+                    </output>
+                </rule>
+
+                <!-- Special Screenings -->
+                <rule id="DT-ROUTE-001-R5">
+                    <condition>
+                        <or>
+                            <condition field="ShowType" operator="EQUALS" value="Special Screening" />
+                            <condition field="ShowType" operator="EQUALS" value="Film Festival" />
+                            <condition field="ShowType" operator="EQUALS" value="Premier" />
+                        </or>
+                    </condition>
+                    <output>
+                        <AssignedTeam>Event Management</AssignedTeam>
+                        <Priority>High</Priority>
+                        <AssignedStaff>Event Manager</AssignedStaff>
+                        <ResponseTime>5 minutes</ResponseTime>
+                    </output>
+                </rule>
+
+                <!-- Regular Bookings -->
+                <rule id="DT-ROUTE-001-R6">
+                    <condition>
+                        <and>
+                            <condition field="ShowType" operator="EQUALS" value="Regular" />
+                            <condition field="IsVIP" operator="EQUALS" value="false" />
+                            <condition field="SeatCount" operator="LESS_THAN_OR_EQUAL" value="4" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AssignedTeam>General Staff</AssignedTeam>
+                        <Priority>Normal</Priority>
+                        <AssignedStaff>Staff Member</AssignedStaff>
+                        <ResponseTime>30 minutes</ResponseTime>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <AssignedTeam>General Staff</AssignedTeam>
+                    <Priority>Normal</Priority>
+                    <AssignedStaff>Staff Member</AssignedStaff>
+                    <ResponseTime>30 minutes</ResponseTime>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             ELIGIBILITY DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Check Movie Eligibility -->
+        <decision-table id="DT-ELIG-001" name="CheckMovieEligibility"
+                        applies-to="Data-Booking"
+                        description="Determines if customer is eligible to book movie based on age, time, and location">
+            
+            <input-fields>
+                <field name="CustomerAge" type="Number" />
+                <field name="MovieRating" type="String" />
+                <field name="ShowTime" type="String" />
+                <field name="CustomerLocation" type="String" />
+                <field name="TheatreLocation" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="IsEligible" type="Boolean" />
+                <field name="EligibilityReason" type="String" />
+                <field name="Restrictions" type="String" />
+            </output-fields>
+
+            <rules>
+                <!-- Age Restriction - A Rated -->
+                <rule id="DT-ELIG-001-R1">
+                    <condition>
+                        <and>
+                            <condition field="MovieRating" operator="EQUALS" value="A" />
+                            <condition field="CustomerAge" operator="LESS_THAN" value="18" />
+                        </and>
+                    </condition>
+                    <output>
+                        <IsEligible>false</IsEligible>
+                        <EligibilityReason>Age restriction</EligibilityReason>
+                        <Restrictions>Must be 18 years or older</Restrictions>
+                    </output>
+                </rule>
+
+                <!-- Age Restriction - U/A -->
+                <rule id="DT-ELIG-001-R2">
+                    <condition>
+                        <and>
+                            <condition field="MovieRating" operator="EQUALS" value="U/A" />
+                            <condition field="CustomerAge" operator="LESS_THAN" value="13" />
+                        </and>
+                    </condition>
+                    <output>
+                        <IsEligible>false</IsEligible>
+                        <EligibilityReason>Age restriction</EligibilityReason>
+                        <Restrictions>Must be 13 years or older, or accompanied by adult</Restrictions>
+                    </output>
+                </rule>
+
+                <!-- Show Time Restriction -->
+                <rule id="DT-ELIG-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="ShowTime" operator="LESS_THAN" value="06:00" />
+                            <condition field="CustomerAge" operator="LESS_THAN" value="18" />
+                        </and>
+                    </condition>
+                    <output>
+                        <IsEligible>false</IsEligible>
+                        <EligibilityReason>Late night show restriction</EligibilityReason>
+                        <Restrictions>Minors not allowed for shows after midnight</Restrictions>
+                    </output>
+                </rule>
+
+                <!-- Location Restriction -->
+                <rule id="DT-ELIG-001-R4">
+                    <condition>
+                        <and>
+                            <condition field="CustomerLocation" operator="NOT_EQUALS" value="TheatreLocation" />
+                            <condition field="CustomerLocation" operator="IS_NOT_NULL" />
+                        </and>
+                    </condition>
+                    <output>
+                        <IsEligible>true</IsEligible>
+                        <EligibilityReason>Valid location</EligibilityReason>
+                        <Restrictions>None - remote booking allowed</Restrictions>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <IsEligible>true</IsEligible>
+                    <EligibilityReason>Eligible</EligibilityReason>
+                    <Restrictions>None</Restrictions>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             SEAT AVAILABILITY DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Check Seat Availability Status -->
+        <decision-table id="DT-SEAT-001" name="CheckSeatAvailabilityStatus"
+                        applies-to="Data-Seat"
+                        description="Determines seat availability status and suggests alternatives">
+            
+            <input-fields>
+                <field name="AvailableSeats" type="Number" />
+                <field name="TotalSeats" type="Number" />
+                <field name="RequestedSeats" type="Number" />
+                <field name="SeatType" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="AvailabilityStatus" type="String" />
+                <field name="SuggestedAction" type="String" />
+                <field name="AlternativeSeats" type="String" />
+            </output-fields>
+
+            <rules>
+                <!-- Housefull -->
+                <rule id="DT-SEAT-001-R1">
+                    <condition>
+                        <condition field="AvailableSeats" operator="EQUALS" value="0" />
+                    </condition>
+                    <output>
+                        <AvailabilityStatus>Housefull</AvailabilityStatus>
+                        <SuggestedAction>Suggest another show or date</SuggestedAction>
+                        <AlternativeSeats>None available</AlternativeSeats>
+                    </output>
+                </rule>
+
+                <!-- Fast Filling -->
+                <rule id="DT-SEAT-001-R2">
+                    <condition>
+                        <and>
+                            <condition field="AvailableSeats" operator="LESS_THAN_OR_EQUAL" value="10" />
+                            <condition field="AvailableSeats" operator="GREATER_THAN" value="0" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AvailabilityStatus>Fast Filling</AvailabilityStatus>
+                        <SuggestedAction>Book immediately to secure seats</SuggestedAction>
+                        <AlternativeSeats>Limited seats available</AlternativeSeats>
+                    </output>
+                </rule>
+
+                <!-- Sufficient Availability -->
+                <rule id="DT-SEAT-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="AvailableSeats" operator="GREATER_THAN" value="10" />
+                            <condition field="AvailableSeats" operator="LESS_THAN_OR_EQUAL" value="50" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AvailabilityStatus>Good Availability</AvailabilityStatus>
+                        <SuggestedAction>Proceed with booking</SuggestedAction>
+                        <AlternativeSeats>Standard seats available</AlternativeSeats>
+                    </output>
+                </rule>
+
+                <!-- Excellent Availability -->
+                <rule id="DT-SEAT-001-R4">
+                    <condition>
+                        <and>
+                            <condition field="AvailableSeats" operator="GREATER_THAN" value="50" />
+                            <condition field="RequestedSeats" operator="LESS_THAN" value="AvailableSeats" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AvailabilityStatus>Excellent Availability</AvailabilityStatus>
+                        <SuggestedAction>Proceed with booking</SuggestedAction>
+                        <AlternativeSeats>Many seats available</AlternativeSeats>
+                    </output>
+                </rule>
+
+                <!-- Specific Seat Type Check -->
+                <rule id="DT-SEAT-001-R5">
+                    <condition>
+                        <and>
+                            <condition field="SeatType" operator="EQUALS" value="Recliner" />
+                            <condition field="AvailableSeats" operator="LESS_THAN" value="5" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AvailabilityStatus>Limited Premium Seats</AvailabilityStatus>
+                        <SuggestedAction>Book now or select alternative seat type</SuggestedAction>
+                        <AlternativeSeats>Consider Prime or Classic seats</AlternativeSeats>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <AvailabilityStatus>Available</AvailabilityStatus>
+                    <SuggestedAction>Proceed with booking</SuggestedAction>
+                    <AlternativeSeats>Seats are available</AlternativeSeats>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             NOTIFICATION DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Determine Notification Channel -->
+        <decision-table id="DT-NOT-001" name="DetermineNotificationChannel"
+                        applies-to="Case-Notification"
+                        description="Determines which notification channels to use based on priority and type">
+            
+            <input-fields>
+                <field name="NotificationType" type="String" />
+                <field name="Priority" type="String" />
+                <field name="CustomerPreference" type="String" />
+                <field name="TimeOfDay" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="Email" type="Boolean" />
+                <field name="SMS" type="Boolean" />
+                <field name="PushNotification" type="Boolean" />
+                <field name="InApp" type="Boolean" />
+            </output-fields>
+
+            <rules>
+                <!-- Booking Confirmation -->
+                <rule id="DT-NOT-001-R1">
+                    <condition>
+                        <condition field="NotificationType" operator="EQUALS" value="BookingConfirmation" />
+                    </condition>
+                    <output>
+                        <Email>true</Email>
+                        <SMS>true</SMS>
+                        <PushNotification>true</PushNotification>
+                        <InApp>true</InApp>
+                    </output>
+                </rule>
+
+                <!-- Booking Reminder -->
+                <rule id="DT-NOT-001-R2">
+                    <condition>
+                        <condition field="NotificationType" operator="EQUALS" value="BookingReminder" />
+                    </condition>
+                    <output>
+                        <Email>true</Email>
+                        <SMS>true</SMS>
+                        <PushNotification>true</PushNotification>
+                        <InApp>false</InApp>
+                    </output>
+                </rule>
+
+                <!-- Payment Confirmation -->
+                <rule id="DT-NOT-001-R3">
+                    <condition>
+                        <condition field="NotificationType" operator="EQUALS" value="PaymentConfirmation" />
+                    </condition>
+                    <output>
+                        <Email>true</Email>
+                        <SMS>true</SMS>
+                        <PushNotification>true</PushNotification>
+                        <InApp>false</InApp>
+                    </output>
+                </rule>
+
+                <!-- Cancellation Notice -->
+                <rule id="DT-NOT-001-R4">
+                    <condition>
+                        <condition field="NotificationType" operator="EQUALS" value="CancellationNotice" />
+                    </condition>
+                    <output>
+                        <Email>true</Email>
+                        <SMS>true</SMS>
+                        <PushNotification>true</PushNotification>
+                        <InApp>true</InApp>
+                    </output>
+                </rule>
+
+                <!-- Promotional Offers -->
+                <rule id="DT-NOT-001-R5">
+                    <condition>
+                        <and>
+                            <condition field="NotificationType" operator="EQUALS" value="Promotion" />
+                            <condition field="CustomerPreference" operator="EQUALS" value="EmailOnly" />
+                        </and>
+                    </condition>
+                    <output>
+                        <Email>true</Email>
+                        <SMS>false</SMS>
+                        <PushNotification>false</PushNotification>
+                        <InApp>false</InApp>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <Email>true</Email>
+                    <SMS>false</SMS>
+                    <PushNotification>false</PushNotification>
+                    <InApp>false</InApp>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             CANCELLATION DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Determine Cancellation Eligibility -->
+        <decision-table id="DT-CANCEL-001" name="DetermineCancellationEligibility"
+                        applies-to="Case-Booking"
+                        description="Determines if booking can be cancelled and refund eligibility">
+            
+            <input-fields>
+                <field name="BookingStatus" type="String" />
+                <field name="ShowDate" type="Date" />
+                <field name="CurrentDate" type="Date" />
+                <field name="IsVIP" type="Boolean" />
+                <field name="BookingAge" type="Number" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="CanCancel" type="Boolean" />
+                <field name="RefundEligible" type="Boolean" />
+                <field name="RefundPercent" type="Number" />
+                <field name="CancellationFee" type="Number" />
+            </output-fields>
+
+            <rules>
+                <!-- Cancellation within 1 hour of booking -->
+                <rule id="DT-CANCEL-001-R1">
+                    <condition>
+                        <and>
+                            <condition field="BookingStatus" operator="EQUALS" value="Confirmed" />
+                            <condition field="BookingAge" operator="LESS_THAN_OR_EQUAL" value="60" />
+                        </and>
+                    </condition>
+                    <output>
+                        <CanCancel>true</CanCancel>
+                        <RefundEligible>true</RefundEligible>
+                        <RefundPercent>100</RefundPercent>
+                        <CancellationFee>0</CancellationFee>
+                    </output>
+                </rule>
+
+                <!-- Cancellation 24+ hours before show -->
+                <rule id="DT-CANCEL-001-R2">
+                    <condition>
+                        <and>
+                            <condition field="BookingStatus" operator="EQUALS" value="Confirmed" />
+                            <condition field="ShowDate" operator="GREATER_THAN" value="CurrentDate + 1 day" />
+                        </and>
+                    </condition>
+                    <output>
+                        <CanCancel>true</CanCancel>
+                        <RefundEligible>true</RefundEligible>
+                        <RefundPercent>80</RefundPercent>
+                        <CancellationFee>20</CancellationFee>
+                    </output>
+                </rule>
+
+                <!-- Cancellation 12-24 hours before show -->
+                <rule id="DT-CANCEL-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="BookingStatus" operator="EQUALS" value="Confirmed" />
+                            <condition field="ShowDate" operator="LESS_THAN_OR_EQUAL" value="CurrentDate + 1 day" />
+                            <condition field="ShowDate" operator="GREATER_THAN" value="CurrentDate + 12 hours" />
+                        </and>
+                    </condition>
+                    <output>
+                        <CanCancel>true</CanCancel>
+                        <RefundEligible>true</RefundEligible>
+                        <RefundPercent>50</RefundPercent>
+                        <CancellationFee>50</CancellationFee>
+                    </output>
+                </rule>
+
+                <!-- Cancellation less than 12 hours before show -->
+                <rule id="DT-CANCEL-001-R4">
+                    <condition>
+                        <and>
+                            <condition field="BookingStatus" operator="EQUALS" value="Confirmed" />
+                            <condition field="ShowDate" operator="LESS_THAN_OR_EQUAL" value="CurrentDate + 12 hours" />
+                            <condition field="ShowDate" operator="GREATER_THAN" value="CurrentDate" />
+                        </and>
+                    </condition>
+                    <output>
+                        <CanCancel>true</CanCancel>
+                        <RefundEligible>false</RefundEligible>
+                        <RefundPercent>0</RefundPercent>
+                        <CancellationFee>100</CancellationFee>
+                    </output>
+                </rule>
+
+                <!-- VIP Cancellation -->
+                <rule id="DT-CANCEL-001-R5">
+                    <condition>
+                        <and>
+                            <condition field="IsVIP" operator="EQUALS" value="true" />
+                            <condition field="BookingStatus" operator="EQUALS" value="Confirmed" />
+                            <condition field="ShowDate" operator="GREATER_THAN" value="CurrentDate" />
+                        </and>
+                    </condition>
+                    <output>
+                        <CanCancel>true</CanCancel>
+                        <RefundEligible>true</RefundEligible>
+                        <RefundPercent>90</RefundPercent>
+                        <CancellationFee>10</CancellationFee>
+                    </output>
+                </rule>
+
+                <!-- Non-cancellable bookings -->
+                <rule id="DT-CANCEL-001-R6">
+                    <condition>
+                        <or>
+                            <condition field="BookingStatus" operator="EQUALS" value="Completed" />
+                            <condition field="BookingStatus" operator="EQUALS" value="Cancelled" />
+                            <condition field="ShowDate" operator="LESS_THAN" value="CurrentDate" />
+                        </or>
+                    </condition>
+                    <output>
+                        <CanCancel>false</CanCancel>
+                        <RefundEligible>false</RefundEligible>
+                        <RefundPercent>0</RefundPercent>
+                        <CancellationFee>0</CancellationFee>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <CanCancel>false</CanCancel>
+                    <RefundEligible>false</RefundEligible>
+                    <RefundPercent>0</RefundPercent>
+                    <CancellationFee>0</CancellationFee>
+                </output>
+            </default-action>
+        </decision-table>
+
+        <!-- ============================================================
+             STAFF ASSIGNMENT DECISION RULES
+             ============================================================ -->
+
+        <!-- Rule: Staff Assignment Based on Workload -->
+        <decision-table id="DT-STAFF-001" name="StaffAssignmentByWorkload"
+                        applies-to="Case-StaffTask"
+                        description="Assigns staff based on current workload and expertise">
+            
+            <input-fields>
+                <field name="TaskType" type="String" />
+                <field name="CurrentWorkload" type="Number" />
+                <field name="StaffExpertise" type="String" />
+                <field name="Availability" type="String" />
+            </input-fields>
+            
+            <output-fields>
+                <field name="AssignedStaffID" type="String" />
+                <field name="QueueName" type="String" />
+                <field name="EstimatedTime" type="String" />
+            </output-fields>
+
+            <rules>
+                <rule id="DT-STAFF-001-R1">
+                    <condition>
+                        <and>
+                            <condition field="TaskType" operator="EQUALS" value="BookingReview" />
+                            <condition field="CurrentWorkload" operator="LESS_THAN" value="5" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AssignedStaffID>Staff001</AssignedStaffID>
+                        <QueueName>General Queue</QueueName>
+                        <EstimatedTime>5 minutes</EstimatedTime>
+                    </output>
+                </rule>
+
+                <rule id="DT-STAFF-001-R2">
+                    <condition>
+                        <and>
+                            <condition field="TaskType" operator="EQUALS" value="VIPBooking" />
+                            <condition field="StaffExpertise" operator="EQUALS" value="VIP" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AssignedStaffID>StaffVIP01</AssignedStaffID>
+                        <QueueName>VIP Queue</QueueName>
+                        <EstimatedTime>2 minutes</EstimatedTime>
+                    </output>
+                </rule>
+
+                <rule id="DT-STAFF-001-R3">
+                    <condition>
+                        <and>
+                            <condition field="TaskType" operator="EQUALS" value="TechnicalSupport" />
+                            <condition field="StaffExpertise" operator="EQUALS" value="Technical" />
+                        </and>
+                    </condition>
+                    <output>
+                        <AssignedStaffID>StaffTech01</AssignedStaffID>
+                        <QueueName>Technical Queue</QueueName>
+                        <EstimatedTime>10 minutes</EstimatedTime>
+                    </output>
+                </rule>
+            </rules>
+
+            <default-action>
+                <output>
+                    <AssignedStaffID>StaffDefault</AssignedStaffID>
+                    <QueueName>Default Queue</QueueName>
+                    <EstimatedTime>15 minutes</EstimatedTime>
+                </output>
+            </default-action>
+        </decision-table>
+
+    </rule-set>
+
+    <!-- ============================================================
+         DECISION RULE SUMMARY
+         ============================================================ -->
+
+    <summary>
+        <decision-category name="Pricing">
+            <description>Rules for calculating prices and applying discounts</description>
+            <rules>
+                <rule ref="DT-PRICE-001" />
+                <rule ref="DT-PRICE-002" />
+            </rules>
+        </decision-category>
+
+        <decision-category name="Routing">
+            <description>Rules for routing bookings and tasks</description>
+            <rules>
+                <rule ref="DT-ROUTE-001" />
+                <rule ref="DT-STAFF-001" />
+            </rules>
+        </decision-category>
+
+        <decision-category name="Eligibility">
+            <description>Rules for checking eligibility</description>
+            <rules>
+                <rule ref="DT-ELIG-001" />
+                <rule ref="DT-SEAT-001" />
+            </rules>
+        </decision-category>
+
+        <decision-category name="Notifications">
+            <description>Rules for notifications</description>
+            <rules>
+                <rule ref="DT-NOT-001" />
+            </rules>
+        </decision-category>
+
+        <decision-category name="Cancellation">
+            <description>Rules for cancellation and refunds</description>
+            <rules>
+                <rule ref="DT-CANCEL-001" />
+            </rules>
+        </decision-category>
+    </summary>
+
+</pega-rules>
