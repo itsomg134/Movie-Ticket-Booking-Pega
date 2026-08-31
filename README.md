@@ -136,40 +136,40 @@ This application provides:
 ```
 movie-ticket-booking-pega/
 │
-├── 📂 src/
-│   ├── 📂 data-models/
+├──  src/
+│   ├──  data-models/
 │   │   ├── booking.sql          # Booking table schema
 │   │   ├── movies.sql           # Movies table schema
 │   │   ├── seat.sql             # Seats table schema
 │   │   ├── show.sql             # Shows table schema
 │   │   └── theatre.sql          # Theatres table schema
 │   │
-│   ├── 📂 ui-screens/
+│   ├──  ui-screens/
 │   │   ├── booking-confirmation.html    # Confirmation page
 │   │   ├── food-beverage.html           # Food & beverage page
 │   │   ├── homepage.html                # Main landing page
 │   │   ├── movie-detail.html            # Movie details page
 │   │   └── seat-selection.html          # Seat selection page
 │   │
-│   ├── 📂 javascript/
+│   ├──  javascript/
 │   │   ├── booking.js           # Booking management logic
 │   │   ├── payment.js           # Payment processing logic
 │   │   └── seat-selection.js    # Seat selection logic
 │   │
-│   └── 📂 css/
+│   └──  css/
 │       └── styles.css           # Global styles
 │
-├── 📂 pega-rules/
+├──  pega-rules/
 │   ├── decision-rules.xml       # Decision table rules
 │   ├── sla-rules.xml           # SLA configuration rules
 │   └── validation-rules.xml    # Validation rules
 │
-├── 📂 docs/
+├──  docs/
 │   ├── functional-spec.md      # Functional specification
 │   ├── technical-design.md     # Technical design document
 │   └── user-guide.md           # User guide
 │
-├── 📂 screenshots/
+├──  screenshots/
 │   ├── homepage.png
 │   ├── movie-detail.png
 │   ├── seat-selection.png
@@ -355,7 +355,7 @@ cd movie-ticket-booking-pega
    Code Review         Package            Performance          Rollback Plan
 ```
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
